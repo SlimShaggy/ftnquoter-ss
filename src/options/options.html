@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>ftnQuoter Settings</title>
+  <link rel="stylesheet" href="options.css">
+</head>
+<body>
+  <div class="container">
+    <h1>ftnQuoter Settings</h1>
+    <p class="description">Configure FTN-style message quoting for Thunderbird</p>
+
+    <form id="settingsForm">
+      <div class="section">
+        <h2>General Settings</h2>
+
+        <div class="field">
+          <label>
+            <input type="checkbox" id="enabled" name="enabled">
+            Enable ftnQuoter
+          </label>
+          <p class="help">Enable or disable FTN-style quoting globally</p>
+        </div>
+
+        <div class="field">
+          <label for="maxLineLen">Maximum line length:</label>
+          <input type="number" id="maxLineLen" name="maxLineLen" min="40" max="120" value="72">
+          <p class="help">Maximum characters per line (default: 72)</p>
+        </div>
+
+        <div class="field">
+          <label for="groupPattern">Group pattern (regex):</label>
+          <input type="text" id="groupPattern" name="groupPattern"
+                 placeholder="^(fido7\.|.*<.*@.*>).*$" size="50">
+          <p class="help">Only apply quoting to messages matching this pattern</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Quoting Options</h2>
+
+        <div class="field">
+          <label>
+            <input type="checkbox" id="quoteEmpty" name="quoteEmpty">
+            Quote empty lines
+          </label>
+          <p class="help">Add quote markers to empty lines</p>
+        </div>
+
+        <div class="field">
+          <label>
+            <input type="checkbox" id="quoteSignature" name="quoteSignature">
+            Quote signature
+          </label>
+          <p class="help">Include signature in quoted text (lines after "--")</p>
+        </div>
+
+        <div class="field">
+          <label>
+            <input type="checkbox" id="flowedFormat" name="flowedFormat">
+            Use flowed format
+          </label>
+          <p class="help">Enable format=flowed for plain text messages</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>Color Settings</h2>
+
+        <div class="field">
+          <label>
+            <input type="checkbox" id="useColors" name="useColors">
+            Use color markup
+          </label>
+          <p class="help">Apply colors to different quote levels</p>
+        </div>
+
+        <div class="field">
+          <label for="color1">First level quote color:</label>
+          <input type="color" id="color1" name="color1">
+          <input type="text" id="color1Text" placeholder="blue" size="15">
+          <p class="help">Color for first level quotes (e.g., "AB>")</p>
+        </div>
+
+        <div class="field">
+          <label for="color2">Second level quote color:</label>
+          <input type="color" id="color2" name="color2">
+          <input type="text" id="color2Text" placeholder="brown" size="15">
+          <p class="help">Color for second level quotes (e.g., "AB> CD>")</p>
+        </div>
+      </div>
+
+      <div class="section">
+        <h2>FidoNet Options</h2>
+
+        <div class="field">
+          <label>
+            <input type="checkbox" id="addXCommentTo" name="addXCommentTo">
+            Add X-Comment-To header
+          </label>
+          <p class="help">Automatically add X-Comment-To header with original sender's name</p>
+        </div>
+      </div>
+
+      <div class="buttons">
+        <button type="submit" id="saveButton" class="primary">Save Settings</button>
+        <button type="button" id="resetButton">Reset to Defaults</button>
+      </div>
+
+      <div id="status" class="status"></div>
+    </form>
+
+    <div class="section info">
+      <h2>About</h2>
+      <p>
+        <strong>ftnQuoter v2.0</strong><br>
+        FTN-style message quoter for modern Thunderbird<br>
+        Original by Sergey Poziturin, modernized for Thunderbird 115+
+      </p>
+      <p class="help">
+        This extension applies FidoNet-style quoting (like GoldEd) to your replies.
+        Instead of standard "&gt;" prefixes, it uses initials like "AB&gt;" for better readability.
+      </p>
+    </div>
+  </div>
+
+  <script src="options.js"></script>
+</body>
+</html>

@@ -1,0 +1,24 @@
+{
+  "name": "ftnquoter-modern",
+  "version": "2.0.0",
+  "description": "FTN-style message quoter for modern Thunderbird",
+  "scripts": {
+    "build": "node build.js",
+    "lint": "web-ext lint --source-dir .",
+    "watch": "web-ext run --source-dir . --browser-console"
+  },
+  "keywords": [
+    "thunderbird",
+    "extension",
+    "fidonet",
+    "ftn",
+    "quoter",
+    "webextension"
+  ],
+  "author": "Claude Code (orig. by Sergey Poziturin)",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "archiver": "^6.0.1",
+    "web-ext": "^7.11.0"
+  }
+}

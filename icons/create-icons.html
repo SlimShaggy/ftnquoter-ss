@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Create Icons</title>
+</head>
+<body>
+  <canvas id="canvas48" width="48" height="48"></canvas>
+  <canvas id="canvas96" width="96" height="96"></canvas>
+
+  <script>
+    function createIcon(canvasId, size) {
+      const canvas = document.getElementById(canvasId);
+      const ctx = canvas.getContext('2d');
+
+      // Background
+      ctx.fillStyle = '#3498db';
+      ctx.roundRect(0, 0, size, size, size / 6);
+      ctx.fill();
+
+      // Text "FQ"
+      ctx.fillStyle = 'white';
+      ctx.font = `bold ${size / 2.4}px monospace`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('FQ', size / 2, size / 1.6);
+
+      // Lines
+      ctx.strokeStyle = 'white';
+      ctx.lineWidth = size / 24;
+      ctx.beginPath();
+      ctx.moveTo(size / 6, size / 4);
+      ctx.lineTo(size * 5 / 6, size / 4);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.7;
+      ctx.lineWidth = size / 32;
+      ctx.beginPath();
+      ctx.moveTo(size / 4, size * 3 / 8);
+      ctx.lineTo(size * 3 / 4, size * 3 / 8);
+      ctx.stroke();
+    }
+
+    // RoundRect polyfill for older browsers
+    if (!CanvasRenderingContext2D.prototype.roundRect) {
+      CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+        this.beginPath();
+        this.moveTo(x + r, y);
+        this.lineTo(x + w - r, y);
+        this.quadraticCurveTo(x + w, y, x + w, y + r);
+        this.lineTo(x + w, y + h - r);
+        this.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+        this.lineTo(x + r, y + h);
+        this.quadraticCurveTo(x, y + h, x, y + h - r);
+        this.lineTo(x, y + r);
+        this.quadraticCurveTo(x, y, x + r, y);
+        this.closePath();
+      };
+    }
+
+    createIcon('canvas48', 48);
+    createIcon('canvas96', 96);
+
+    // Download icons
+    setTimeout(() => {
+      ['canvas48', 'canvas96'].forEach(id => {
+        const canvas = document.getElementById(id);
+        const link = document.createElement('a');
+        link.download = `icon-${id.replace('canvas', '')}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+      });
+    }, 100);
+  </script>
+
+  <p>Icons should download automatically. If not, right-click on the canvases above and save them.</p>
+</body>
+</html>
