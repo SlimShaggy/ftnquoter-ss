@@ -59,8 +59,10 @@ const FTNQuoter = {
     // Remove &nbsp;
     line = line.replace(/&nbsp;?/g, " ");
 
-    // Check if this is Thunderbird's attribution line (e.g., "On ... wrote:")
-    if (line.match(/^On .* wrote:/i)) {
+    // Check if this is Thunderbird's attribution line.
+    // English: "On <date>, <name> wrote:"
+    // Russian: "DD.MM.YYYY HH:MM, <name> пишет:"
+    if (line.match(/^On .* wrote:/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}, .+ пишет:/)) {
       // Don't quote attribution lines - return as is
       return line;
     }
@@ -119,31 +121,70 @@ const FTNQuoter = {
 
     const lines = text.split(/\r?\n/);
     const quotedLines = [];
-    let inSignature = false;
+    let inQuotedSignature = false;
+    // Set to true once we have seen at least one ">"-prefixed quoted line.
+    // After that, the first non-quoted, non-empty line marks the start of the
+    // reply author's own composition area, which we must never touch.
+    let seenQuotedLine = false;
 
-    for (const line of lines) {
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
       const trimmed = line.trim();
+      const isQuotedLine = /^ *>/.test(line);
 
-      // Keep attribution line as-is without quoting
-      if (line.match(/^On .* wrote:$/i)) {
+      // Keep attribution line as-is without quoting, then insert a blank line
+      // between it and the first quoted line (FTN style).
+      // English: "On <date>, <name> wrote:"
+      // Russian: "DD.MM.YYYY HH:MM, <name> пишет:"
+      if (line.match(/^On .* wrote:$/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}, .+ пишет:$/)) {
         quotedLines.push(line);
+        quotedLines.push("");
         continue;
       }
 
-      // Check for signature
-      if (trimmed === "--" && !quoteSignature) {
-        inSignature = true;
-        continue;
-      }
-
-      if (inSignature) {
-        if (trimmed.length === 0) {
-          inSignature = false;
+      // Once the quoted block is over (we've seen at least one "> " line and
+      // now hit a line without a ">" prefix), everything that follows belongs
+      // to the reply author — preserve it verbatim and stop processing.
+      // This includes blank separator lines between the quote and the reply
+      // signature, which must not be quoted or stripped.
+      if (seenQuotedLine && !isQuotedLine) {
+        for (let j = i; j < lines.length; j++) {
+          quotedLines.push(lines[j]);
         }
+        break;
+      }
+
+      // Track whether we're inside the quoted block.
+      if (isQuotedLine) {
+        seenQuotedLine = true;
+      }
+
+      // Detect the FidoNet signature separator inside a quoted block.
+      // Thunderbird wraps the original "--- ..." line as "> --- ...".
+      if (line.match(/^ *> *---/)) {
+        if (quoteSignature) {
+          // Quote the separator itself and continue collecting quoted sig lines.
+          quotedLines.push(this.quoteLine(line, initials, quoteEmpty, maxLineLen));
+        } else {
+          // Also strip the optional tagline immediately preceding the tearline.
+          // A tagline is a line starting with "..." (after the "> " quote prefix).
+          if (quotedLines.length > 0 && quotedLines[quotedLines.length - 1].match(/^ *[\wА-Яа-яЁё]{1,3}> *\.\.\./) ) {
+            quotedLines.pop();
+          }
+        }
+        inQuotedSignature = true;
         continue;
       }
 
-      // Quote the line (quoteLine will handle empty lines based on quoteEmpty setting)
+      if (inQuotedSignature) {
+        if (quoteSignature) {
+          quotedLines.push(this.quoteLine(line, initials, quoteEmpty, maxLineLen));
+        }
+        // Whether included or skipped, keep scanning to the end of the quoted block.
+        continue;
+      }
+
+      // Quote the line (quoteLine will handle empty lines based on quoteEmpty setting).
       quotedLines.push(this.quoteLine(line, initials, quoteEmpty, maxLineLen));
     }
 
