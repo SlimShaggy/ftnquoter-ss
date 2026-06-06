@@ -9,7 +9,7 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 
-const OUTPUT_FILE = 'ftnquoter-2.0.0.xpi';
+const OUTPUT_FILE = 'ftnquoter-2.0.1.xpi';
 const BUILD_DIR = path.join(__dirname);
 
 // Files and directories to exclude from the build
