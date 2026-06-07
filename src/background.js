@@ -314,18 +314,25 @@ async function processComposeWindow(tab) {
     );
 
     if (!isReply) {
-      // For new messages, insert newGreeting if configured
+      // Always mark as processed so the polling loop never retries this tab.
+      processedTabs.add(tab.id);
+
+      // For new messages, prepend newGreeting if configured.
       if (settings.newGreeting) {
         const greeting = settings.newGreeting + "\n\n";
+        // Read the current body so we prepend rather than overwrite
+        // (Thunderbird may have already inserted the user's signature).
+        const currentDetails = await browser.compose.getComposeDetails(tab.id);
         const composeDetails = {};
-        if (details.isPlainText === false) {
-          composeDetails.body = greeting.replace(/\n/g, '<br>\n');
+        if (currentDetails.isPlainText === false) {
+          const currentBody = currentDetails.body || "";
+          composeDetails.body = greeting.replace(/\n/g, '<br>\n') + currentBody;
         } else {
-          composeDetails.plainTextBody = greeting;
+          const currentBody = currentDetails.plainTextBody || "";
+          composeDetails.plainTextBody = greeting + currentBody;
         }
         await browser.compose.setComposeDetails(tab.id, composeDetails);
         console.log("ftnQuoter: new message greeting applied");
-        processedTabs.add(tab.id);
       } else {
         console.log("ftnQuoter: not a reply, skipping");
       }
