@@ -12,7 +12,9 @@ const DEFAULT_SETTINGS = {
   color2: "brown",
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
-  flowedFormat: false
+  flowedFormat: false,
+  newGreeting: "",
+  replyGreeting: ""
 };
 
 // Color name to hex mapping
@@ -57,6 +59,8 @@ async function loadSettings() {
     document.getElementById('groupPattern').value = settings.groupPattern;
     document.getElementById('addXCommentTo').checked = settings.addXCommentTo;
     document.getElementById('flowedFormat').checked = settings.flowedFormat;
+    document.getElementById('newGreeting').value = settings.newGreeting;
+    document.getElementById('replyGreeting').value = settings.replyGreeting;
 
     // Handle colors
     const color1Hex = colorNameToHex(settings.color1);
@@ -90,7 +94,9 @@ async function saveSettings(e) {
     color2: document.getElementById('color2Text').value || hexToColorName(document.getElementById('color2').value),
     groupPattern: document.getElementById('groupPattern').value,
     addXCommentTo: document.getElementById('addXCommentTo').checked,
-    flowedFormat: document.getElementById('flowedFormat').checked
+    flowedFormat: document.getElementById('flowedFormat').checked,
+    newGreeting: document.getElementById('newGreeting').value,
+    replyGreeting: document.getElementById('replyGreeting').value
   };
 
   try {

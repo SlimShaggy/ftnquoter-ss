@@ -103,6 +103,14 @@ input[type="color"] + input[type="text"] {
   font-style: italic;
 }
 
+.help code {
+  font-family: monospace;
+  font-style: normal;
+  background: #e8e8e8;
+  padding: 1px 4px;
+  border-radius: 3px;
+}
+
 .buttons {
   margin-top: 30px;
   padding-top: 20px;

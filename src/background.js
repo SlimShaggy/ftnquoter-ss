@@ -62,7 +62,7 @@ const FTNQuoter = {
     // Check if this is Thunderbird's attribution line.
     // English: "On <date>, <name> wrote:"
     // Russian: "DD.MM.YYYY HH:MM, <name> пишет:"
-    if (line.match(/^On .* wrote:/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}, .+ пишет:/)) {
+    if (line.match(/^On .* wrote:/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{1,2}:\d{2}, .+ пишет:/)) {
       // Don't quote attribution lines - return as is
       return line;
     }
@@ -136,7 +136,7 @@ const FTNQuoter = {
       // between it and the first quoted line (FTN style).
       // English: "On <date>, <name> wrote:"
       // Russian: "DD.MM.YYYY HH:MM, <name> пишет:"
-      if (line.match(/^On .* wrote:$/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}, .+ пишет:$/)) {
+      if (line.match(/^On .* wrote:$/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{1,2}:\d{2}, .+ пишет:$/)) {
         quotedLines.push(line);
         quotedLines.push("");
         continue;
@@ -263,7 +263,9 @@ const DEFAULT_SETTINGS = {
   color2: "brown",
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
-  flowedFormat: false
+  flowedFormat: false,
+  newGreeting: "",
+  replyGreeting: ""
 };
 
 // Track processed tabs
@@ -312,7 +314,28 @@ async function processComposeWindow(tab) {
     );
 
     if (!isReply) {
-      console.log("ftnQuoter: not a reply, skipping");
+      // Always mark as processed so the polling loop never retries this tab.
+      processedTabs.add(tab.id);
+
+      // For new messages, prepend newGreeting if configured.
+      if (settings.newGreeting) {
+        const greeting = settings.newGreeting + "\n\n";
+        // Read the current body so we prepend rather than overwrite
+        // (Thunderbird may have already inserted the user's signature).
+        const currentDetails = await browser.compose.getComposeDetails(tab.id);
+        const composeDetails = {};
+        if (currentDetails.isPlainText === false) {
+          const currentBody = currentDetails.body || "";
+          composeDetails.body = greeting.replace(/\n/g, '<br>\n') + currentBody;
+        } else {
+          const currentBody = currentDetails.plainTextBody || "";
+          composeDetails.plainTextBody = greeting + currentBody;
+        }
+        await browser.compose.setComposeDetails(tab.id, composeDetails);
+        console.log("ftnQuoter: new message greeting applied");
+      } else {
+        console.log("ftnQuoter: not a reply, skipping");
+      }
       return;
     }
 
@@ -367,15 +390,31 @@ async function processComposeWindow(tab) {
     console.log("ftnQuoter: quoted length:", quoted.length);
     console.log("ftnQuoter: quoted preview:", quoted.substring(0, 500));
 
+    // Build reply greeting prefix with %firstname%, %lastname%, %fullname% substitution
+    let greetingPrefix = "";
+    if (settings.replyGreeting) {
+      const nameParts = senderName ? senderName.trim().split(/\s+/) : [];
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+      const fullName = senderName || "";
+      greetingPrefix = settings.replyGreeting
+        .replace(/%firstname%/gi, firstName)
+        .replace(/%lastname%/gi, lastName)
+        .replace(/%fullname%/gi, fullName)
+        + "\n\n";
+      console.log("ftnQuoter: reply greeting:", greetingPrefix.trim());
+    }
+
     // Add double newline after quote to separate from reply
-    const quotedWithSpace = quoted + "\n\n";
+    const quotedWithSpace = greetingPrefix + quoted + "\n\n";
 
     // Check if we should use colors (HTML mode)
     const composeDetails = {};
 
     if (settings.useColors && details.isPlainText === false) {
       // HTML mode with colors
-      const htmlBody = FTNQuoter.formatBodyAsHTML(quoted, settings) + '<br><br>';
+      const greetingPrefixHtml = greetingPrefix.replace(/\n/g, '<br>\n');
+      const htmlBody = greetingPrefixHtml + FTNQuoter.formatBodyAsHTML(quoted, settings) + '<br><br>';
       composeDetails.body = htmlBody;
       console.log("ftnQuoter: applying HTML with colors");
     } else {
