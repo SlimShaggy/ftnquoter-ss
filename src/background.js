@@ -62,7 +62,7 @@ const FTNQuoter = {
     // Check if this is Thunderbird's attribution line.
     // English: "On <date>, <name> wrote:"
     // Russian: "DD.MM.YYYY HH:MM, <name> пишет:"
-    if (line.match(/^On .* wrote:/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}, .+ пишет:/)) {
+    if (line.match(/^On .* wrote:/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{1,2}:\d{2}, .+ пишет:/)) {
       // Don't quote attribution lines - return as is
       return line;
     }
@@ -136,7 +136,7 @@ const FTNQuoter = {
       // between it and the first quoted line (FTN style).
       // English: "On <date>, <name> wrote:"
       // Russian: "DD.MM.YYYY HH:MM, <name> пишет:"
-      if (line.match(/^On .* wrote:$/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{2}:\d{2}, .+ пишет:$/)) {
+      if (line.match(/^On .* wrote:$/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{1,2}:\d{2}, .+ пишет:$/)) {
         quotedLines.push(line);
         quotedLines.push("");
         continue;
