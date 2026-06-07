@@ -263,7 +263,9 @@ const DEFAULT_SETTINGS = {
   color2: "brown",
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
-  flowedFormat: false
+  flowedFormat: false,
+  newGreeting: "",
+  replyGreeting: ""
 };
 
 // Track processed tabs
@@ -312,7 +314,21 @@ async function processComposeWindow(tab) {
     );
 
     if (!isReply) {
-      console.log("ftnQuoter: not a reply, skipping");
+      // For new messages, insert newGreeting if configured
+      if (settings.newGreeting) {
+        const greeting = settings.newGreeting + "\n\n";
+        const composeDetails = {};
+        if (details.isPlainText === false) {
+          composeDetails.body = greeting.replace(/\n/g, '<br>\n');
+        } else {
+          composeDetails.plainTextBody = greeting;
+        }
+        await browser.compose.setComposeDetails(tab.id, composeDetails);
+        console.log("ftnQuoter: new message greeting applied");
+        processedTabs.add(tab.id);
+      } else {
+        console.log("ftnQuoter: not a reply, skipping");
+      }
       return;
     }
 
@@ -367,15 +383,24 @@ async function processComposeWindow(tab) {
     console.log("ftnQuoter: quoted length:", quoted.length);
     console.log("ftnQuoter: quoted preview:", quoted.substring(0, 500));
 
+    // Build reply greeting prefix (replyGreeting with %name% substituted)
+    let greetingPrefix = "";
+    if (settings.replyGreeting) {
+      const firstName = senderName ? senderName.split(/[ ,]+/)[0] : "";
+      greetingPrefix = settings.replyGreeting.replace(/%name%/g, firstName) + "\n\n";
+      console.log("ftnQuoter: reply greeting:", greetingPrefix.trim());
+    }
+
     // Add double newline after quote to separate from reply
-    const quotedWithSpace = quoted + "\n\n";
+    const quotedWithSpace = greetingPrefix + quoted + "\n\n";
 
     // Check if we should use colors (HTML mode)
     const composeDetails = {};
 
     if (settings.useColors && details.isPlainText === false) {
       // HTML mode with colors
-      const htmlBody = FTNQuoter.formatBodyAsHTML(quoted, settings) + '<br><br>';
+      const greetingPrefixHtml = greetingPrefix.replace(/\n/g, '<br>\n');
+      const htmlBody = greetingPrefixHtml + FTNQuoter.formatBodyAsHTML(quoted, settings) + '<br><br>';
       composeDetails.body = htmlBody;
       console.log("ftnQuoter: applying HTML with colors");
     } else {
