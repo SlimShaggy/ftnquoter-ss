@@ -390,11 +390,18 @@ async function processComposeWindow(tab) {
     console.log("ftnQuoter: quoted length:", quoted.length);
     console.log("ftnQuoter: quoted preview:", quoted.substring(0, 500));
 
-    // Build reply greeting prefix (replyGreeting with %name% substituted)
+    // Build reply greeting prefix with %firstname%, %lastname%, %fullname% substitution
     let greetingPrefix = "";
     if (settings.replyGreeting) {
-      const firstName = senderName ? senderName.split(/[ ,]+/)[0] : "";
-      greetingPrefix = settings.replyGreeting.replace(/%name%/g, firstName) + "\n\n";
+      const nameParts = senderName ? senderName.trim().split(/\s+/) : [];
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";
+      const fullName = senderName || "";
+      greetingPrefix = settings.replyGreeting
+        .replace(/%firstname%/gi, firstName)
+        .replace(/%lastname%/gi, lastName)
+        .replace(/%fullname%/gi, fullName)
+        + "\n\n";
       console.log("ftnQuoter: reply greeting:", greetingPrefix.trim());
     }
 
