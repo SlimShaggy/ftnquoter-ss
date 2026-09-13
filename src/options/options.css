@@ -82,6 +82,13 @@ input[type="number"]:focus {
   box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
 }
 
+input[type="text"]:disabled {
+  background-color: #f8f9fa;
+  color: #7f8c8d;
+  cursor: not-allowed;
+  border-color: #e2e8f0;
+}
+
 input[type="color"] {
   width: 60px;
   height: 35px;

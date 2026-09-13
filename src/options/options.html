@@ -106,16 +106,23 @@
         <h2>Greetings</h2>
 
         <div class="field">
+          <label>
+            <input type="checkbox" id="addGreetings" name="addGreetings">
+            Automatically add greetings
+          </label>
+        </div>
+
+        <div class="field">
           <label for="newGreeting">New message greeting:</label>
           <input type="text" id="newGreeting" name="newGreeting"
-                 placeholder="Hello, all!" size="50">
+                 value="Hello, all!" placeholder="Hello, all!" size="50">
           <p class="help">Inserted at the beginning of new (non-reply) messages. Leave empty to disable.</p>
         </div>
 
         <div class="field">
           <label for="replyGreeting">Reply greeting:</label>
           <input type="text" id="replyGreeting" name="replyGreeting"
-                 placeholder="Hello, %firstname%!" size="50">
+                 value="Hello, %firstname%!" placeholder="Hello, %firstname%!" size="50">
           <p class="help">Inserted at the beginning of replies. Use <code>%firstname%</code>, <code>%lastname%</code>, or <code>%fullname%</code> to insert the sender's name. Leave empty to disable.</p>
         </div>
       </div>

@@ -264,8 +264,9 @@ const DEFAULT_SETTINGS = {
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
   flowedFormat: false,
-  newGreeting: "",
-  replyGreeting: ""
+  addGreetings: false,
+  newGreeting: "Hello, all!",
+  replyGreeting: "Hello, %firstname%!"
 };
 
 // Track processed tabs
@@ -274,7 +275,23 @@ const processedTabs = new Set();
 // Settings management
 async function getSettings() {
   const result = await browser.storage.local.get('settings');
-  return { ...DEFAULT_SETTINGS, ...result.settings };
+  const stored = result.settings || {};
+  const settings = { ...DEFAULT_SETTINGS, ...stored };
+
+  // Migration from older versions (where greetings were enabled by non-empty string)
+  if (stored.addGreetings === undefined) {
+    if (stored.newGreeting !== undefined || stored.replyGreeting !== undefined) {
+      settings.addGreetings = Boolean((stored.newGreeting && stored.newGreeting.trim()) || (stored.replyGreeting && stored.replyGreeting.trim()));
+    }
+    if (!settings.newGreeting) {
+      settings.newGreeting = DEFAULT_SETTINGS.newGreeting;
+    }
+    if (!settings.replyGreeting) {
+      settings.replyGreeting = DEFAULT_SETTINGS.replyGreeting;
+    }
+  }
+
+  return settings;
 }
 
 async function saveSettings(settings) {
@@ -317,8 +334,8 @@ async function processComposeWindow(tab) {
       // Always mark as processed so the polling loop never retries this tab.
       processedTabs.add(tab.id);
 
-      // For new messages, prepend newGreeting if configured.
-      if (settings.newGreeting) {
+      // For new messages, prepend newGreeting if enabled and non-empty.
+      if (settings.addGreetings && settings.newGreeting && settings.newGreeting.trim()) {
         const greeting = settings.newGreeting + "\n\n";
         // Read the current body so we prepend rather than overwrite
         // (Thunderbird may have already inserted the user's signature).
@@ -392,7 +409,7 @@ async function processComposeWindow(tab) {
 
     // Build reply greeting prefix with %firstname%, %lastname%, %fullname% substitution
     let greetingPrefix = "";
-    if (settings.replyGreeting) {
+    if (settings.addGreetings && settings.replyGreeting && settings.replyGreeting.trim()) {
       const nameParts = senderName ? senderName.trim().split(/\s+/) : [];
       const firstName = nameParts[0] || "";
       const lastName = nameParts.length > 1 ? nameParts[nameParts.length - 1] : "";

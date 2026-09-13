@@ -13,8 +13,9 @@ const DEFAULT_SETTINGS = {
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
   flowedFormat: false,
-  newGreeting: "",
-  replyGreeting: ""
+  addGreetings: false,
+  newGreeting: "Hello, all!",
+  replyGreeting: "Hello, %firstname%!"
 };
 
 // Color name to hex mapping
@@ -48,7 +49,21 @@ function colorNameToHex(name) {
 async function loadSettings() {
   try {
     const response = await browser.runtime.sendMessage({ type: "getSettings" });
-    const settings = { ...DEFAULT_SETTINGS, ...response };
+    const stored = response || {};
+    const settings = { ...DEFAULT_SETTINGS, ...stored };
+
+    // Migration / fallback for older saved settings (where greetings were enabled by non-empty string)
+    if (stored.addGreetings === undefined) {
+      if (stored.newGreeting !== undefined || stored.replyGreeting !== undefined) {
+        settings.addGreetings = Boolean((stored.newGreeting && stored.newGreeting.trim()) || (stored.replyGreeting && stored.replyGreeting.trim()));
+      }
+      if (!settings.newGreeting) {
+        settings.newGreeting = DEFAULT_SETTINGS.newGreeting;
+      }
+      if (!settings.replyGreeting) {
+        settings.replyGreeting = DEFAULT_SETTINGS.replyGreeting;
+      }
+    }
 
     // Populate form fields
     document.getElementById('enabled').checked = settings.enabled;
@@ -59,8 +74,11 @@ async function loadSettings() {
     document.getElementById('groupPattern').value = settings.groupPattern;
     document.getElementById('addXCommentTo').checked = settings.addXCommentTo;
     document.getElementById('flowedFormat').checked = settings.flowedFormat;
+    document.getElementById('addGreetings').checked = settings.addGreetings;
     document.getElementById('newGreeting').value = settings.newGreeting;
+    document.getElementById('newGreeting').disabled = !settings.addGreetings;
     document.getElementById('replyGreeting').value = settings.replyGreeting;
+    document.getElementById('replyGreeting').disabled = !settings.addGreetings;
 
     // Handle colors
     const color1Hex = colorNameToHex(settings.color1);
@@ -95,6 +113,7 @@ async function saveSettings(e) {
     groupPattern: document.getElementById('groupPattern').value,
     addXCommentTo: document.getElementById('addXCommentTo').checked,
     flowedFormat: document.getElementById('flowedFormat').checked,
+    addGreetings: document.getElementById('addGreetings').checked,
     newGreeting: document.getElementById('newGreeting').value,
     replyGreeting: document.getElementById('replyGreeting').value
   };
@@ -177,12 +196,25 @@ function setupColorSync() {
   });
 }
 
+function setupGreetingSync() {
+  const addGreetings = document.getElementById('addGreetings');
+  const newGreeting = document.getElementById('newGreeting');
+  const replyGreeting = document.getElementById('replyGreeting');
+
+  addGreetings.addEventListener('change', (e) => {
+    const enabled = e.target.checked;
+    newGreeting.disabled = !enabled;
+    replyGreeting.disabled = !enabled;
+  });
+}
+
 /**
  * Initialize page
  */
 document.addEventListener('DOMContentLoaded', () => {
   loadSettings();
   setupColorSync();
+  setupGreetingSync();
 
   document.getElementById('settingsForm').addEventListener('submit', saveSettings);
   document.getElementById('resetButton').addEventListener('click', resetSettings);
