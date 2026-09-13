@@ -333,6 +333,13 @@ async function processComposeWindow(tab) {
       relatedMessageId: details.relatedMessageId
     });
 
+    // Messages opened from Drafts must never be modified.
+    if (details.type === "draft") {
+      processedTabs.add(tab.id);
+      console.log("ftnQuoter: draft message, skipping");
+      return;
+    }
+
     // Check if reply
     const isReply = details.type && (
       details.type.toLowerCase().includes("reply") ||
