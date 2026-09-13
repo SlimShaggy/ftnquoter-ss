@@ -71,7 +71,7 @@ const FTNQuoter = {
     // This is what TB adds when replying
     const tbQuoteMatch = line.match(/^ *> (.*)$/);
     if (tbQuoteMatch) {
-      const quotedText = tbQuoteMatch[1];
+      let quotedText = tbQuoteMatch[1];
 
       // Check if this is an empty line (TB marks it as "> ")
       if (quotedText.trim().length === 0) {
@@ -80,6 +80,13 @@ const FTNQuoter = {
         } else {
           return ""; // Don't quote empty lines
         }
+      }
+
+      // RFC 3676 format=flowed space-unstuffing:
+      // When TB quotes format=flowed text, lines that start with a space are space-stuffed
+      // by prepending an extra space after the quote marker. Remove that stuffed space.
+      if (quotedText.startsWith(" ")) {
+        quotedText = quotedText.substring(1);
       }
 
       // Check if the quoted text has FTN-style quotes (e.g., "IZ>", "IZ>>", "IZ>>>", etc.)
@@ -92,7 +99,10 @@ const FTNQuoter = {
         // "DK>>>> text" becomes "DK>>>>> text"
         const nestedInitials = nestedQuoteMatch[1];
         const existingMarkers = nestedQuoteMatch[2]; // >, >>, >>>, etc.
-        const nestedText = nestedQuoteMatch[3];
+        let nestedText = nestedQuoteMatch[3];
+        if (nestedText.startsWith(" ")) {
+          nestedText = nestedText.substring(1);
+        }
         const prefix = ` ${nestedInitials}${existingMarkers}> `;
         return this.splitLongLine(nestedText, prefix, maxLen).join('\n');
       } else {
