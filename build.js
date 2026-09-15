@@ -9,7 +9,8 @@ const fs = require('fs');
 const path = require('path');
 const archiver = require('archiver');
 
-const OUTPUT_FILE = 'ftnquoter-2.0.2.xpi';
+const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf8'));
+const OUTPUT_FILE = `ftnquoter-${manifest.version}.xpi`;
 const BUILD_DIR = path.join(__dirname);
 
 // Files and directories to exclude from the build

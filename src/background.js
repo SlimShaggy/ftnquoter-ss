@@ -274,7 +274,7 @@ const DEFAULT_SETTINGS = {
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
   flowedFormat: false,
-  addGreetings: false,
+  addGreetings: true,
   newGreeting: "Hello, all!",
   replyGreeting: "Hello, %firstname%!"
 };

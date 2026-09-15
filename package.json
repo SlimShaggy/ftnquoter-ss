@@ -1,6 +1,6 @@
 {
   "name": "ftnquoter-ss",
-  "version": "2.0.2",
+  "version": "2.0.3",
   "description": "FTN-style message quoter for modern Thunderbird",
   "scripts": {
     "build": "node build.js",
