@@ -1,5 +1,5 @@
 /**
- * Compose script for ftnQuoter
+ * Compose script for ftnQuoter-ss
  * Adds color highlighting to FTN-style quotes in compose window
  */
 
@@ -17,7 +17,7 @@
       settings = { ...settings, ...result.settings };
     }
   } catch (e) {
-    console.error("ftnQuoter compose-script: error loading settings", e);
+    console.error("ftnQuoter-ss compose-script: error loading settings", e);
   }
 
   let isProcessing = false;
@@ -131,7 +131,7 @@
     });
 
     if (foundQuotes > 0) {
-      console.log(`ftnQuoter compose-script: colored ${foundQuotes} quotes`);
+      console.log(`ftnQuoter-ss compose-script: colored ${foundQuotes} quotes`);
     }
 
     // Reconnect observer after processing

@@ -1,4 +1,4 @@
-# Установка и тестирование ftnQuoter v2.0
+# Установка и тестирование ftnQuoter-ss v2.0
 
 ### Вариант 1: Временная установка для тестирования (рекомендуется для разработки)
 
@@ -20,7 +20,7 @@ npm install
 npm run build
 ```
 
-Будет создан файл `ftnquoter-2.0.0.xpi` в корневой директории проекта.
+Будет создан файл `ftnquoter-ss-2.0.x.xpi` в корневой директории проекта.
 
 **Что происходит при сборке:**
 - Скрипт `build.js` создаёт ZIP-архив
@@ -33,20 +33,20 @@ npm run build
 2. Откройте меню **☰ → Дополнения и темы** (или нажмите `Ctrl+Shift+A`)
 3. Нажмите на **шестеренку** (⚙️) в правом верхнем углу
 4. Выберите **Установить дополнение из файла...**
-5. Выберите файл `ftnquoter-2.0.0.xpi`
+5. Выберите файл `ftnquoter-ss-2.0.x.xpi`
 6. Подтвердите установку
 
 ## Настройка
 
 1. После установки откройте **☰ → Дополнения и темы**
-2. Найдите **ftnQuoter** в списке
+2. Найдите **ftnQuoter-ss** в списке
 3. Нажмите на расширение и выберите **Настройки**
 4. Настройте параметры по своему вкусу
 
 ### Рекомендуемые настройки для FidoNet
 
 ```
-Включить ftnQuoter: ✓
+Включить ftnQuoter-ss: ✓
 Максимальная длина строки: 72
 Шаблон групп: ^(fido7\.|.*<.*@.*>).*$
 Цитировать пустые строки: ☐
@@ -103,13 +103,13 @@ npm run build
 ### Просмотр логов
 
 1. Откройте **☰ → Дополнительные инструменты → Консоль браузера** (`Ctrl+Shift+J`)
-2. В фильтре введите `ftnQuoter`
+2. В фильтре введите `ftnQuoter-ss`
 3. Вы увидите сообщения типа:
    ```
-   ftnQuoter: initialized
-   ftnQuoter: settings loaded: {...}
-   ftnQuoter: extracted initials: SP from "Sergey Poziturin <sp@example.com>"
-   ftnQuoter: applied FTN-style quoting
+   ftnQuoter-ss: initialized
+   ftnQuoter-ss: settings loaded: {...}
+   ftnQuoter-ss: extracted initials: SP from "Sergey Poziturin <sp@example.com>"
+   ftnQuoter-ss: applied FTN-style quoting
    ```
 
 ### Частые проблемы
@@ -163,12 +163,12 @@ npm install
 npm run build
 
 # 4. Проверьте содержимое
-unzip -l ftnquoter-2.0.0.xpi
+unzip -l ftnquoter-ss-2.0.x.xpi
 ```
 
 **Ожидаемое содержимое XPI:**
 ```
-Archive:  ftnquoter-2.0.0.xpi
+Archive:  ftnquoter-ss-2.0.x.xpi
   manifest.json
   src/background.js
   src/display-script.js
@@ -184,7 +184,7 @@ Archive:  ftnquoter-2.0.0.xpi
 
 1. Зарегистрируйтесь на https://addons.thunderbird.net
 2. Создайте новое дополнение
-3. Загрузите файл `ftnquoter-2.0.0.xpi`
+3. Загрузите файл `ftnquoter-ss-2.0.x.xpi`
 4. Заполните описание и метаданные
 5. Дождитесь проверки модераторами
 

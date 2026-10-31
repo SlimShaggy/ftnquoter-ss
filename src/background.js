@@ -1,7 +1,11 @@
 /**
- * Background script for ftnQuoter v2.0
+ * Background script for ftnQuoter-ss v2.0
  * Handles compose window events and applies FTN-style quoting
  */
+
+const LOG_PREFIX = "ftnQuoter-ss:";
+const log = (...args) => console.log(LOG_PREFIX, ...args);
+const logError = (...args) => console.error(LOG_PREFIX, ...args);
 
 // FTN Quoter logic - inline to avoid importScripts issues
 const FTNQuoter = {
@@ -218,7 +222,7 @@ const FTNQuoter = {
       const regex = new RegExp(pattern);
       return regex.test(recipient);
     } catch (e) {
-      console.error("ftnQuoter: invalid regex:", pattern, e);
+      logError("invalid regex:", pattern, e);
       return false;
     }
   },
@@ -312,23 +316,23 @@ async function saveSettings(settings) {
 // Main processing function
 async function processComposeWindow(tab) {
   try {
-    console.log("ftnQuoter: processing tab", tab.id);
+    log("processing tab", tab.id);
 
     if (processedTabs.has(tab.id)) {
-      console.log("ftnQuoter: already processed");
+      log("already processed");
       return;
     }
 
     const settings = await getSettings();
-    console.log("ftnQuoter: settings:", settings);
+    log("settings:", settings);
 
     if (!settings.enabled) {
-      console.log("ftnQuoter: disabled");
+      log("disabled");
       return;
     }
 
     const details = await browser.compose.getComposeDetails(tab.id);
-    console.log("ftnQuoter: details:", {
+    log("details:", {
       type: details.type,
       to: details.to,
       relatedMessageId: details.relatedMessageId
@@ -337,7 +341,7 @@ async function processComposeWindow(tab) {
     // Messages opened from Drafts must never be modified.
     if (details.type === "draft") {
       processedTabs.add(tab.id);
-      console.log("ftnQuoter: draft message, skipping");
+      log("draft message, skipping");
       return;
     }
 
@@ -367,9 +371,9 @@ async function processComposeWindow(tab) {
           composeDetails.plainTextBody = greeting + currentBody;
         }
         await browser.compose.setComposeDetails(tab.id, composeDetails);
-        console.log("ftnQuoter: new message greeting applied");
+        log("new message greeting applied");
       } else {
-        console.log("ftnQuoter: not a reply, skipping");
+        log("not a reply, skipping");
       }
       return;
     }
@@ -379,17 +383,17 @@ async function processComposeWindow(tab) {
     const recipientString = recipients
       .map(r => typeof r === 'string' ? r : (r.addr || r.email || ''))
       .join(", ");
-    console.log("ftnQuoter: recipients:", recipientString);
+    log("recipients:", recipientString);
 
     // If recipients are empty, skip pattern check (Reply window might not have recipients yet)
     if (recipientString.trim().length > 0) {
       if (!FTNQuoter.matchesGroup(recipientString, settings.groupPattern)) {
-        console.log("ftnQuoter: pattern mismatch");
+        log("pattern mismatch");
         return;
       }
-      console.log("ftnQuoter: pattern matches");
+      log("pattern matches");
     } else {
-      console.log("ftnQuoter: recipients empty, skipping pattern check");
+      log("recipients empty, skipping pattern check");
     }
 
     // Get original sender
@@ -400,18 +404,18 @@ async function processComposeWindow(tab) {
     if (details.relatedMessageId) {
       try {
         const msg = await browser.messages.get(details.relatedMessageId);
-        console.log("ftnQuoter: author:", msg.author);
+        log("author:", msg.author);
         if (msg && msg.author) {
           initials = FTNQuoter.getInitials(msg.author);
           senderName = FTNQuoter.getName(msg.author);
-          console.log("ftnQuoter: initials:", initials, "name:", senderName);
+          log("initials:", initials, "name:", senderName);
         }
         if (msg) {
           originalSubject = msg.subject;
-          console.log("ftnQuoter: original subject:", originalSubject);
+          log("original subject:", originalSubject);
         }
       } catch (e) {
-        console.error("ftnQuoter: error getting message:", e);
+        logError("error getting message:", e);
       }
     }
 
@@ -422,26 +426,26 @@ async function processComposeWindow(tab) {
       try {
         const subject = details.subject.replace(/^Re:\s*/i, "");
         await browser.compose.setComposeDetails(tab.id, { subject });
-        console.log("ftnQuoter: stripped Re: from subject:", subject);
+        log("stripped Re: from subject:", subject);
       } catch (e) {
-        console.error("ftnQuoter: error updating subject:", e);
+        logError("error updating subject:", e);
       }
     }
 
     // Get body
     const body = details.plainTextBody || details.body || "";
-    console.log("ftnQuoter: body length:", body.length);
-    console.log("ftnQuoter: body preview:", body.substring(0, 500));
+    log("body length:", body.length);
+    log("body preview:", body.substring(0, 500));
 
     if (!body || body.trim().length === 0) {
-      console.log("ftnQuoter: empty body");
+      log("empty body");
       return;
     }
 
     // Quote it
     const quoted = FTNQuoter.formatBody(body, initials, settings);
-    console.log("ftnQuoter: quoted length:", quoted.length);
-    console.log("ftnQuoter: quoted preview:", quoted.substring(0, 500));
+    log("quoted length:", quoted.length);
+    log("quoted preview:", quoted.substring(0, 500));
 
     // Build reply greeting prefix with %firstname%, %lastname%, %fullname% substitution
     let greetingPrefix = "";
@@ -455,7 +459,7 @@ async function processComposeWindow(tab) {
         .replace(/%lastname%/gi, lastName)
         .replace(/%fullname%/gi, fullName)
         + "\n\n";
-      console.log("ftnQuoter: reply greeting:", greetingPrefix.trim());
+      log("reply greeting:", greetingPrefix.trim());
     }
 
     // Add double newline after quote to separate from reply
@@ -469,17 +473,17 @@ async function processComposeWindow(tab) {
       const greetingPrefixHtml = greetingPrefix.replace(/\n/g, '<br>\n');
       const htmlBody = greetingPrefixHtml + FTNQuoter.formatBodyAsHTML(quoted, settings) + '<br><br>';
       composeDetails.body = htmlBody;
-      console.log("ftnQuoter: applying HTML with colors");
+      log("applying HTML with colors");
     } else {
       // Plain text mode
       composeDetails.plainTextBody = quotedWithSpace;
-      console.log("ftnQuoter: applying plain text");
+      log("applying plain text");
     }
 
     // Update compose window
     await browser.compose.setComposeDetails(tab.id, composeDetails);
 
-    console.log("ftnQuoter: SUCCESS - quoting applied!");
+    log("SUCCESS - quoting applied!");
 
     // Add X-Comment-To header
     if (settings.addXCommentTo && senderName) {
@@ -490,17 +494,17 @@ async function processComposeWindow(tab) {
         if (!hasXCT) {
           headers.push({ name: 'X-Comment-To', value: senderName });
           await browser.compose.setComposeDetails(tab.id, { customHeaders: headers });
-          console.log("ftnQuoter: added X-Comment-To:", senderName);
+          log("added X-Comment-To:", senderName);
         }
       } catch (e) {
-        console.error("ftnQuoter: error adding header:", e);
+        logError("error adding header:", e);
       }
     }
 
     processedTabs.add(tab.id);
 
   } catch (error) {
-    console.error("ftnQuoter: ERROR:", error);
+    logError("ERROR:", error);
     console.error("Stack:", error.stack);
   }
 }
@@ -510,27 +514,27 @@ let composeListenerRegistered = false;
 
 // Method 1: Register message display script for quote coloring when viewing messages
 if (browser.messageDisplayScripts) {
-  console.log("ftnQuoter: messageDisplayScripts API available");
+  log("messageDisplayScripts API available");
   browser.messageDisplayScripts.register({
     js: [{ file: "src/display-script.js" }]
   }).then(() => {
-    console.log("ftnQuoter: display script registered");
+    log("display script registered");
   }).catch(e => {
-    console.log("ftnQuoter: display script registration failed:", e);
+    log("display script registration failed:", e);
   });
 } else {
-  console.log("ftnQuoter: messageDisplayScripts API not available");
+  log("messageDisplayScripts API not available");
 }
 
 // Also register compose script for quote coloring in compose window (if available)
 if (browser.composeScripts) {
-  console.log("ftnQuoter: composeScripts API available");
+  log("composeScripts API available");
   browser.composeScripts.register({
     js: [{ file: "src/compose-script.js" }]
   }).then(() => {
-    console.log("ftnQuoter: compose script registered");
+    log("compose script registered");
   }).catch(e => {
-    console.log("ftnQuoter: compose script registration failed:", e);
+    log("compose script registration failed:", e);
   });
 }
 
@@ -540,30 +544,30 @@ async function checkForComposeTabs() {
     const tabs = await browser.tabs.query({ type: "messageCompose" });
     for (const tab of tabs) {
       if (!processedTabs.has(tab.id)) {
-        console.log("ftnQuoter: found new compose tab:", tab.id);
+        log("found new compose tab:", tab.id);
         // Delay to ensure window is ready
         setTimeout(() => processComposeWindow(tab), 500);
       }
     }
   } catch (e) {
-    console.log("ftnQuoter: tabs.query failed:", e);
+    log("tabs.query failed:", e);
   }
 }
 
 // Start polling
 setInterval(checkForComposeTabs, 2000);
-console.log("ftnQuoter: polling started");
+log("polling started");
 
 // Initialize
 async function init() {
-  console.log("ftnQuoter: v2.0 initialized");
+  log("v2.0 initialized");
 
   processedTabs.clear();
 
   const settings = await getSettings();
   await saveSettings(settings);
 
-  console.log("ftnQuoter: ready with settings:", settings);
+  log("ready with settings:", settings);
 
   // Initial check
   checkForComposeTabs();
@@ -573,7 +577,7 @@ init();
 
 // Handle messages from options page
 browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  console.log("ftnQuoter: message:", message.type);
+  log("message:", message.type);
 
   if (message.type === "getSettings") {
     getSettings().then(sendResponse);
@@ -582,11 +586,11 @@ browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.type === "saveSettings") {
     saveSettings(message.settings).then(() => {
-      console.log("ftnQuoter: settings saved");
+      log("settings saved");
       sendResponse({ success: true });
     });
     return true;
   }
 });
 
-console.log("ftnQuoter: background script loaded");
+log("background script loaded");

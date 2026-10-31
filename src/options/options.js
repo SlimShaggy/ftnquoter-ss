@@ -1,5 +1,5 @@
 /**
- * Options page script for ftnQuoter
+ * Options page script for ftnQuoter-ss
  */
 
 const DEFAULT_SETTINGS = {

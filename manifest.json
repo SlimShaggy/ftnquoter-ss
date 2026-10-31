@@ -1,6 +1,6 @@
 {
   "manifest_version": 2,
-  "name": "ftnQuoter",
+  "name": "ftnQuoter-ss",
   "version": "2.0.4",
   "author": "Claude Code (orig. by Sergey Poziturin)",
   "description": "FTN-style message quoter (like GoldEd) for modern Thunderbird",

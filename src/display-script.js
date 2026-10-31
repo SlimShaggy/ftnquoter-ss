@@ -1,5 +1,5 @@
 /**
- * Message display script for ftnQuoter
+ * Message display script for ftnQuoter-ss
  * Adds color highlighting to FTN-style quotes when viewing messages
  */
 
@@ -17,7 +17,7 @@
       settings = { ...settings, ...result.settings };
     }
   } catch (e) {
-    console.error("ftnQuoter display-script: error loading settings", e);
+    console.error("ftnQuoter-ss display-script: error loading settings", e);
   }
 
   let isProcessing = false;
@@ -129,7 +129,7 @@
     });
 
     if (foundQuotes > 0) {
-      console.log(`ftnQuoter display-script: colored ${foundQuotes} quotes`);
+      console.log(`ftnQuoter-ss display-script: colored ${foundQuotes} quotes`);
     }
 
     // Reconnect observer after processing

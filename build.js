@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * Build script for ftnQuoter extension
+ * Build script for ftnQuoter-ss extension
  * Creates XPI file for distribution
  */
 
@@ -10,7 +10,7 @@ const path = require('path');
 const archiver = require('archiver');
 
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf8'));
-const OUTPUT_FILE = `ftnquoter-${manifest.version}.xpi`;
+const OUTPUT_FILE = `ftnquoter-ss-${manifest.version}.xpi`;
 const BUILD_DIR = path.join(__dirname);
 
 // Files and directories to exclude from the build

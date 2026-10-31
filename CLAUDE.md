@@ -10,12 +10,12 @@ ftnQuoter is a Thunderbird 115+ MailExtension (Manifest V2, plain JavaScript, no
 
 ```sh
 npm install
-npm run build   # node build.js -> ftnquoter-<manifest version>.xpi in repo root
+npm run build   # node build.js -> ftnquoter-ss-<manifest version>.xpi in repo root
 npm run lint    # web-ext lint
 npm run watch   # web-ext run with browser console (launches a Firefox-family browser)
 ```
 
-There are no automated tests. To verify a change, install the built `.xpi` in Thunderbird (Add-ons → gear → Install Add-on From File), reply to a message, and filter the browser console (Ctrl+Shift+J) by `ftnQuoter`. Every code path logs with the `ftnQuoter:` prefix. See `doc/DEBUGGING.md`.
+There are no automated tests. To verify a change, install the built `.xpi` in Thunderbird (Add-ons → gear → Install Add-on From File), reply to a message, and filter the browser console (Ctrl+Shift+J) by `ftnQuoter-ss`. Every code path logs with the `ftnQuoter-ss:` prefix. See `doc/DEBUGGING.md`.
 
 ## Architecture
 

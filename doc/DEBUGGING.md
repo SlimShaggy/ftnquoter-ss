@@ -1,4 +1,4 @@
-# Отладка ftnQuoter v2.0
+# Отладка ftnQuoter-ss v2.0
 
 Если расширение установлено, но не влияет на цитирование, следуйте этим шагам:
 
@@ -6,10 +6,10 @@
 
 1. Откройте Thunderbird
 2. `Меню → Дополнения и темы` (Ctrl+Shift+A)
-3. Найдите **ftnQuoter** в списке
+3. Найдите **ftnQuoter-ss** в списке
 4. Убедитесь что:
    - ✅ Расширение **включено**
-   - ✅ Версия: **2.0.0**
+   - ✅ Версия: **2.0.x**
    - ✅ Нет ошибок или предупреждений
 
 ## Шаг 2: Проверка логов
@@ -18,72 +18,72 @@
 
 1. `Меню → Дополнительные инструменты → Консоль браузера`
 2. Или нажмите `Ctrl+Shift+J` (Cmd+Shift+J на macOS)
-3. В фильтре введите: `ftnQuoter`
+3. В фильтре введите: `ftnQuoter-ss`
 
 ### Что искать в логах
 
 При запуске Thunderbird должны быть:
 ```
-ftnQuoter: initialized (v2.0)
-ftnQuoter: default settings: {enabled: true, maxLineLen: 72, ...}
-ftnQuoter: settings loaded from storage
-ftnQuoter: messageDisplayScripts registered
-ftnQuoter: composeScripts registered
-ftnQuoter: polling started (interval: 2000ms)
+ftnQuoter-ss: initialized (v2.0)
+ftnQuoter-ss: default settings: {enabled: true, maxLineLen: 72, ...}
+ftnQuoter-ss: settings loaded from storage
+ftnQuoter-ss: messageDisplayScripts registered
+ftnQuoter-ss: composeScripts registered
+ftnQuoter-ss: polling started (interval: 2000ms)
 ```
 
 При открытии Reply должны быть (через ~2 секунды после открытия):
 ```
-ftnQuoter: checking for compose tabs...
-ftnQuoter: found 1 compose tab(s)
-ftnQuoter: new compose tab detected: [tabId]
-ftnQuoter: processing will start in 500ms...
-ftnQuoter: processComposeWindow called for tab [tabId]
-ftnQuoter: compose details: {type: "reply", plainTextBody: "...", ...}
-ftnQuoter: processing reply/forward
-ftnQuoter: recipients: ["user@example.com"]
-ftnQuoter: recipient matches group pattern
-ftnQuoter: original message: {author: "Name <email>", ...}
-ftnQuoter: extracted initials: "AB" from "Alice Bob"
-ftnQuoter: formatting body (X lines)
-ftnQuoter: processed quote body (Y lines)
-ftnQuoter: updating compose window...
-ftnQuoter: [optional] adding X-Comment-To header
-ftnQuoter: FTN-style quoting applied successfully
-ftnQuoter: tab [tabId] marked as processed
+ftnQuoter-ss: checking for compose tabs...
+ftnQuoter-ss: found 1 compose tab(s)
+ftnQuoter-ss: new compose tab detected: [tabId]
+ftnQuoter-ss: processing will start in 500ms...
+ftnQuoter-ss: processComposeWindow called for tab [tabId]
+ftnQuoter-ss: compose details: {type: "reply", plainTextBody: "...", ...}
+ftnQuoter-ss: processing reply/forward
+ftnQuoter-ss: recipients: ["user@example.com"]
+ftnQuoter-ss: recipient matches group pattern
+ftnQuoter-ss: original message: {author: "Name <email>", ...}
+ftnQuoter-ss: extracted initials: "AB" from "Alice Bob"
+ftnQuoter-ss: formatting body (X lines)
+ftnQuoter-ss: processed quote body (Y lines)
+ftnQuoter-ss: updating compose window...
+ftnQuoter-ss: [optional] adding X-Comment-To header
+ftnQuoter-ss: FTN-style quoting applied successfully
+ftnQuoter-ss: tab [tabId] marked as processed
 ```
 
 ### Распространенные ошибки и их решения
 
-**Ошибка 1:** `ftnQuoter: extension is disabled`
+**Ошибка 1:** `ftnQuoter-ss: extension is disabled`
 - **Причина:** Расширение отключено в настройках
-- **Решение:** Откройте настройки (`Меню → Дополнения → ftnQuoter → Настройки`) и установите галочку "Включить ftnQuoter"
+- **Решение:** Откройте настройки (`Меню → Дополнения → ftnQuoter-ss → Настройки`) и установите галочку "Включить ftnQuoter-ss"
 
-**Ошибка 2:** `ftnQuoter: not a reply/forward, skipping (type: "draft")`
+**Ошибка 2:** `ftnQuoter-ss: not a reply/forward, skipping (type: "draft")`
 - **Причина:** Открыто новое письмо, а не ответ или пересылка
 - **Решение:** Откройте существующее письмо и нажмите "Ответить" или "Переслать"
 
-**Ошибка 3:** `ftnQuoter: no recipients found, skipping group pattern check`
+**Ошибка 3:** `ftnQuoter-ss: no recipients found, skipping group pattern check`
 - **Причина:** В окне композиции отсутствуют получатели
 - **Решение:** Нормальное поведение - расширение продолжит работу без проверки паттерна
 
-**Ошибка 4:** `ftnQuoter: recipient doesn't match group pattern`
+**Ошибка 4:** `ftnQuoter-ss: recipient doesn't match group pattern`
 - **Причина:** Адрес получателя не соответствует регулярному выражению в настройках
 - **Решение:**
-  1. Посмотрите в логе адрес получателя: `ftnQuoter: recipients: ["actual@email.com"]`
-  2. Откройте настройки ftnQuoter
+  1. Посмотрите в логе адрес получателя: `ftnQuoter-ss: recipients: ["actual@email.com"]`
+  2. Откройте настройки ftnQuoter-ss
   3. Измените "Шаблон групп":
      - Для всех адресов: `.*`
      - Для конкретного домена: `.*@example\.com.*`
      - Для FidoNet: `^(fido7\.|.*<.*@.*>).*$` (по умолчанию)
 
-**Ошибка 5:** `ftnQuoter: plainTextBody is empty`
+**Ошибка 5:** `ftnQuoter-ss: plainTextBody is empty`
 - **Причина:** Тело сообщения пустое или в HTML режиме
 - **Решение:**
   - Убедитесь что оригинальное письмо содержит текст
   - Проверьте что Thunderbird в режиме Plain Text (не HTML)
 
-**Ошибка 6:** `ftnQuoter: failed to get original message`
+**Ошибка 6:** `ftnQuoter-ss: failed to get original message`
 - **Причина:** Не удалось получить оригинальное сообщение
 - **Решение:** Убедитесь что письмо не было удалено из почтового ящика
 
@@ -95,17 +95,17 @@ ftnQuoter: tab [tabId] marked as processed
 
 ## Шаг 3: Проверка настроек
 
-1. `Меню → Дополнения и темы → ftnQuoter → Настройки`
+1. `Меню → Дополнения и темы → ftnQuoter-ss → Настройки`
 
 ### Обязательные настройки:
 
-- ✅ **Включить ftnQuoter** — должна быть галочка
+- ✅ **Включить ftnQuoter-ss** — должна быть галочка
 - 📝 **Шаблон групп** — для теста используйте `.*` (разрешить все адреса)
 
 ### Попробуйте минимальную конфигурацию:
 
 ```
-Включить ftnQuoter: ✓
+Включить ftnQuoter-ss: ✓
 Максимальная длина строки: 72
 Шаблон групп: .*
 Цитировать пустые строки: ☐
@@ -151,7 +151,7 @@ ftnQuoter: tab [tabId] marked as processed
 
 Откройте `about:debugging#/runtime/this-firefox` (или для Thunderbird: `about:debugging`)
 
-Найдите ftnQuoter и проверьте permissions:
+Найдите ftnQuoter-ss и проверьте permissions:
 - ✅ compose
 - ✅ messagesRead
 - ✅ storage
@@ -164,21 +164,21 @@ ftnQuoter: tab [tabId] marked as processed
 
 1. **Удалить расширение:**
    - `Меню → Дополнения и темы`
-   - Найти ftnQuoter
+   - Найти ftnQuoter-ss
    - `...` → Удалить
    - Перезапустить Thunderbird
 
 2. **Пересобрать XPI:**
    ```bash
    cd modern-extension
-   rm ftnquoter-2.0.0.xpi
+   rm ftnquoter-ss-2.0.x.xpi
    npm run build
    ```
 
 3. **Установить заново:**
    - `Меню → Дополнения и темы`
    - `⚙️` → Установить дополнение из файла
-   - Выбрать новый `ftnquoter-2.0.0.xpi`
+   - Выбрать новый `ftnquoter-ss-2.0.x.xpi`
 
 ## Известные проблемы
 
@@ -212,7 +212,7 @@ setTimeout(async () => {
 
 **Диагностика:** Проверьте логи - должно быть сообщение каждые 2 секунды:
 ```
-ftnQuoter: checking for compose tabs...
+ftnQuoter-ss: checking for compose tabs...
 ```
 
 **Решение:**
@@ -255,7 +255,7 @@ processedTabs.clear();
    - Версия
 
 3. **Логи из консоли:**
-   - Весь вывод с префиксом `ftnQuoter:`
+   - Весь вывод с префиксом `ftnQuoter-ss:`
    - Любые ошибки
 
 4. **Настройки расширения:**
@@ -292,10 +292,10 @@ processComposeWindow({id: 5}); // Может не работать из-за sco
 2. Откройте Developer Tools для окна просмотра (F12)
 3. В Console должны быть сообщения:
 ```
-ftnQuoter display: initializing...
-ftnQuoter display: settings loaded
-ftnQuoter display: applying quote colors...
-ftnQuoter display: processed X text nodes
+ftnQuoter-ss display: initializing...
+ftnQuoter-ss display: settings loaded
+ftnQuoter-ss display: applying quote colors...
+ftnQuoter-ss display: processed X text nodes
 ```
 
 ### Проверка polling механизма
