@@ -12,7 +12,7 @@ ftnquoter/
 ├── src/                    # Исходный код расширения
 │   ├── background.js      # Главный контроллер (478 строк)
 │   │                      # - inline FTNQuoter object
-│   │                      # - polling механизм (каждые 2 сек)
+│   │                      # - отслеживание compose окон (tabs.onCreated)
 │   │                      # - processComposeWindow()
 │   │                      # - обработка compose windows
 │   │
@@ -77,13 +77,12 @@ ftnquoter/
 - `getSettings()` — чтение настроек из browser.storage.local
 - `saveSettings(settings)` — сохранение настроек
 - `processComposeWindow(tab)` — обработка окна Reply/Forward
-- `checkForComposeTabs()` — polling новых compose окон
+- `processOpenComposeTabs()` — обработка compose окон, открытых до запуска расширения
 - `init()` — инициализация расширения
 
 **Механизмы:**
-- Polling: `setInterval(checkForComposeTabs, 2000)` — каждые 2 секунды
-- Tracking: `Set processedTabs` — отслеживание обработанных вкладок
-- Delay: `setTimeout(processComposeWindow, 500)` — задержка перед обработкой
+- Событие: `browser.tabs.onCreated` — вызывает `processComposeWindow` для вкладок типа `messageCompose`
+- Tracking: `Set processedTabs` — каждая вкладка обрабатывается не больше одного раза
 
 #### display-script.js (182 строки)
 **Подсветка FTN-цитат при просмотре сообщений**
@@ -212,10 +211,9 @@ ftnquoter/
 ## Известные особенности архитектуры
 
 1. **FTNQuoter inline в background.js** — из-за ограничений importScripts в Thunderbird вся логика встроена напрямую
-2. **Polling вместо событий** — нет события "compose window opened" в TB API, используется setInterval(2000ms)
-3. **Delay 500ms** — race condition с инициализацией compose window в TB требует задержки
-4. **processedTabs Set** — предотвращение повторной обработки одних и тех же вкладок
-5. **UTF-8 hardcoded** — невозможно изменить charset через WebExtension API (критическая проблема для FTN)
+2. **tabs.onCreated** — отдельного события "compose window opened" в TB API нет, но `tabs.onCreated` срабатывает и для окон написания (`tab.type === "messageCompose"`). Задержка не нужна: `compose.getComposeDetails()` сам ждёт готовности редактора
+3. **processedTabs Set** — вкладка помечается в начале `processComposeWindow`, поэтому повторной обработки не бывает
+4. **UTF-8 hardcoded** — невозможно изменить charset через WebExtension API (критическая проблема для FTN)
 
 ---
 

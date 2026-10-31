@@ -284,7 +284,7 @@ const DEFAULT_SETTINGS = {
   replyGreeting: "Hello, %firstname%!"
 };
 
-// Track processed tabs
+// Tabs already handled; each compose tab is processed at most once
 const processedTabs = new Set();
 
 // Settings management
@@ -322,6 +322,8 @@ async function processComposeWindow(tab) {
       log("already processed");
       return;
     }
+    // Mark before the first await so a concurrent call for the same tab bails out.
+    processedTabs.add(tab.id);
 
     const settings = await getSettings();
     log("settings:", settings);
@@ -340,7 +342,6 @@ async function processComposeWindow(tab) {
 
     // Messages opened from Drafts must never be modified.
     if (details.type === "draft") {
-      processedTabs.add(tab.id);
       log("draft message, skipping");
       return;
     }
@@ -353,9 +354,6 @@ async function processComposeWindow(tab) {
     );
 
     if (!isReply) {
-      // Always mark as processed so the polling loop never retries this tab.
-      processedTabs.add(tab.id);
-
       // For new messages, prepend newGreeting if enabled and non-empty.
       if (settings.addGreetings && settings.newGreeting && settings.newGreeting.trim()) {
         const greeting = settings.newGreeting + "\n\n";
@@ -501,18 +499,13 @@ async function processComposeWindow(tab) {
       }
     }
 
-    processedTabs.add(tab.id);
-
   } catch (error) {
     logError("ERROR:", error);
     console.error("Stack:", error.stack);
   }
 }
 
-// Try to catch compose window creation via different methods
-let composeListenerRegistered = false;
-
-// Method 1: Register message display script for quote coloring when viewing messages
+// Register message display script for quote coloring when viewing messages
 if (browser.messageDisplayScripts) {
   log("messageDisplayScripts API available");
   browser.messageDisplayScripts.register({
@@ -538,25 +531,26 @@ if (browser.composeScripts) {
   });
 }
 
-// Method 2: Poll for new compose tabs
-async function checkForComposeTabs() {
+// Process compose tabs as they open. getComposeDetails() waits until
+// the compose editor is ready, so no extra delay is needed.
+browser.tabs.onCreated.addListener(tab => {
+  if (tab.type === "messageCompose") {
+    log("new compose tab:", tab.id);
+    processComposeWindow(tab);
+  }
+});
+
+// Compose tabs that were already open when the extension started
+async function processOpenComposeTabs() {
   try {
     const tabs = await browser.tabs.query({ type: "messageCompose" });
     for (const tab of tabs) {
-      if (!processedTabs.has(tab.id)) {
-        log("found new compose tab:", tab.id);
-        // Delay to ensure window is ready
-        setTimeout(() => processComposeWindow(tab), 500);
-      }
+      processComposeWindow(tab);
     }
   } catch (e) {
     log("tabs.query failed:", e);
   }
 }
-
-// Start polling
-setInterval(checkForComposeTabs, 2000);
-log("polling started");
 
 // Initialize
 async function init() {
@@ -569,8 +563,7 @@ async function init() {
 
   log("ready with settings:", settings);
 
-  // Initial check
-  checkForComposeTabs();
+  processOpenComposeTabs();
 }
 
 init();

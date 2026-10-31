@@ -29,15 +29,11 @@ ftnQuoter-ss: default settings: {enabled: true, maxLineLen: 72, ...}
 ftnQuoter-ss: settings loaded from storage
 ftnQuoter-ss: messageDisplayScripts registered
 ftnQuoter-ss: composeScripts registered
-ftnQuoter-ss: polling started (interval: 2000ms)
 ```
 
-При открытии Reply должны быть (через ~2 секунды после открытия):
+При открытии Reply должны быть:
 ```
-ftnQuoter-ss: checking for compose tabs...
-ftnQuoter-ss: found 1 compose tab(s)
-ftnQuoter-ss: new compose tab detected: [tabId]
-ftnQuoter-ss: processing will start in 500ms...
+ftnQuoter-ss: new compose tab: [tabId]
 ftnQuoter-ss: processComposeWindow called for tab [tabId]
 ftnQuoter-ss: compose details: {type: "reply", plainTextBody: "...", ...}
 ftnQuoter-ss: processing reply/forward
@@ -197,26 +193,23 @@ ftnQuoter-ss: tab [tabId] marked as processed
 
 **Проблема:** Расширение применяет FTN-цитирование, но затем Thunderbird перезаписывает текст стандартным.
 
-**Причина:** Thunderbird может инициализировать compose window асинхронно.
+**Причина:** Thunderbird может инициализировать compose window асинхронно. Расширение рассчитывает на то, что `compose.getComposeDetails()` дожидается готовности редактора.
 
-**Решение:** Увеличьте задержку в `src/background.js:459`:
+**Решение:** Если проблема воспроизводится, добавьте задержку в обработчик `tabs.onCreated` в `src/background.js`:
 ```javascript
-setTimeout(async () => {
-  await processComposeWindow(tab);
-}, 1000);  // Было 500ms, увеличено до 1000ms
+setTimeout(() => processComposeWindow(tab), 500);
 ```
 
-### 3. Polling не обнаруживает новые окна
+### 3. Новые окна не обнаруживаются
 
 **Проблема:** Compose windows открываются, но не обрабатываются.
 
-**Диагностика:** Проверьте логи - должно быть сообщение каждые 2 секунды:
+**Диагностика:** При открытии окна написания в логе должно появиться сообщение:
 ```
-ftnQuoter-ss: checking for compose tabs...
+ftnQuoter-ss: new compose tab: [tabId]
 ```
 
 **Решение:**
-- Убедитесь что `setInterval` не был отменён
 - Проверьте Browser Console (не Developer Console!)
 - Переустановите расширение
 
@@ -297,13 +290,3 @@ ftnQuoter-ss display: settings loaded
 ftnQuoter-ss display: applying quote colors...
 ftnQuoter-ss display: processed X text nodes
 ```
-
-### Проверка polling механизма
-
-В Browser Console выполните:
-```javascript
-// Проверить что интервал активен
-setInterval(() => console.log("Polling check"), 2000);
-```
-
-Если сообщения появляются каждые 2 секунды - polling работает.

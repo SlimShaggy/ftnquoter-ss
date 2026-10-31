@@ -21,7 +21,7 @@
 │  ┌────────────────────────────────────────────────────────┐ │
 │  │           ftnQuoter Extension (background.js)         │ │
 │  │                                                        │ │
-│  │  Polling: checkForComposeTabs() every 2s              │ │
+│  │  Events:  tabs.onCreated (messageCompose)             │ │
 │  │  Scripts: messageDisplayScripts.register()            │ │
 │  │           composeScripts.register()                   │ │
 │  │                                                        │ │
@@ -75,7 +75,9 @@ Start
   │
   ├─► Register composeScripts (compose-script.js)
   │
-  ├─► Start polling: setInterval(checkForComposeTabs, 2000)
+  ├─► Listen for new compose tabs: tabs.onCreated
+  │
+  ├─► Process already open compose tabs: processOpenComposeTabs()
   │
   └─► Register message listeners
         • browser.runtime.onMessage (for settings)
@@ -118,19 +120,12 @@ User opens message
 ### 3. Обработка Reply/Forward
 
 ```
-Polling (every 2 seconds)
-  │
-  ├─► checkForComposeTabs()
-  │     │
-  │     ├─► browser.tabs.query({ type: "messageCompose" })
-  │     │
-  │     └─► For each new tab (not in processedTabs):
-  │           │
-  │           └─► setTimeout(processComposeWindow, 500)
+browser.tabs.onCreated (tab.type === "messageCompose")
   │
   └─► processComposeWindow(tab)
         │
         ├─► Check if already processed → Exit
+        ├─► Add tab.id to processedTabs
         ├─► Get settings
         ├─► Check if enabled → Exit if disabled
         │
@@ -173,10 +168,8 @@ Polling (every 2 seconds)
         │     • browser.compose.setComposeDetails()
         │     • Set plainTextBody
         │
-        ├─► Add X-Comment-To header (if enabled)
-        │     • Set customHeaders: [{name: 'X-Comment-To', value}]
-        │
-        └─► Add tab.id to processedTabs
+        └─► Add X-Comment-To header (if enabled)
+              • Set customHeaders: [{name: 'X-Comment-To', value}]
 ```
 
 ### 3. Настройки
@@ -227,14 +220,12 @@ User opens Options
 │  • getSettings() → Promise<Settings>    │
 │  • saveSettings(settings) → Promise     │
 │  • processComposeWindow(tab) → Promise  │
-│  • checkForComposeTabs() (polling)      │
+│  • processOpenComposeTabs()             │
 │  • init()                               │
 │                                         │
 │ Event Listeners:                        │
 │  • runtime.onMessage (settings sync)    │
-│                                         │
-│ Polling:                                │
-│  • setInterval(checkForComposeTabs, 2s) │
+│  • tabs.onCreated (new compose tabs)    │
 │                                         │
 │ Script Registration:                    │
 │  • messageDisplayScripts.register()     │
