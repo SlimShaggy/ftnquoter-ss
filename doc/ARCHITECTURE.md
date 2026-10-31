@@ -79,7 +79,6 @@ Start
   │
   └─► Register message listeners
         • browser.runtime.onMessage (for settings)
-        • browser.compose.onBeforeSend (ignored)
 ```
 
 ### 2. Подсветка цитат при просмотре
@@ -291,9 +290,7 @@ User opens Options
   "permissions": [
     "compose",        // Read/write compose window
     "messagesRead",   // Access message details
-    "accountsRead",   // Read email accounts (for recipients)
     "storage",        // Save settings
-    "tabs",           // Query compose tabs
     "messagesModify"  // Modify message display
   ]
 }
@@ -303,9 +300,7 @@ User opens Options
 
 - **compose**: Необходим для чтения и изменения содержимого окна композиции
 - **messagesRead**: Для получения информации об оригинальном сообщении (автор, тема)
-- **accountsRead**: Для проверки адресов получателей (используется при фильтрации по groupPattern)
 - **storage**: Для хранения настроек пользователя в browser.storage.local
-- **tabs**: Для polling механизма - обнаружения новых compose windows
 - **messagesModify**: Для messageDisplayScripts и composeScripts (подсветка цитат)
 
 ## 🎯 Ключевые алгоритмы

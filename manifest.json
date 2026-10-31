@@ -17,9 +17,7 @@
   "permissions": [
     "compose",
     "messagesRead",
-    "accountsRead",
     "storage",
-    "tabs",
     "messagesModify"
   ],
   "background": {
@@ -28,9 +26,5 @@
   "options_ui": {
     "page": "src/options/options.html",
     "open_in_tab": true
-  },
-  "compose_action": {
-    "default_title": "ftnQuoter",
-    "default_icon": "icons/icon-48.png"
   }
 }

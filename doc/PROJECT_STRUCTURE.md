@@ -206,9 +206,7 @@ ftnquoter/
 |-----------|-----------|-------|
 | `compose` | Чтение/изменение compose окон | background.js |
 | `messagesRead` | Доступ к оригинальным сообщениям | background.js |
-| `accountsRead` | Чтение recipients для groupPattern | background.js |
 | `storage` | Сохранение настроек | background.js, options.js |
-| `tabs` | Query compose tabs (polling) | background.js |
 | `messagesModify` | messageDisplayScripts/composeScripts | display-script.js, compose-script.js |
 
 ## Известные особенности архитектуры

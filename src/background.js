@@ -505,13 +505,6 @@ async function processComposeWindow(tab) {
   }
 }
 
-// Listen for compose windows opening
-// Using BeforeSend as trigger + delay to ensure window is ready
-browser.compose.onBeforeSend.addListener(async (tab) => {
-  console.log("ftnQuoter: onBeforeSend - ignoring");
-  // We don't modify on send
-});
-
 // Try to catch compose window creation via different methods
 let composeListenerRegistered = false;
 
@@ -544,7 +537,7 @@ if (browser.composeScripts) {
 // Method 2: Poll for new compose tabs
 async function checkForComposeTabs() {
   try {
-    const tabs = await messenger.tabs.query({ type: "messageCompose" });
+    const tabs = await browser.tabs.query({ type: "messageCompose" });
     for (const tab of tabs) {
       if (!processedTabs.has(tab.id)) {
         console.log("ftnQuoter: found new compose tab:", tab.id);
@@ -553,19 +546,7 @@ async function checkForComposeTabs() {
       }
     }
   } catch (e) {
-    console.log("ftnQuoter: tabs.query failed, trying alternative");
-    // Fallback - try with browser.tabs
-    try {
-      const tabs = await browser.tabs.query({});
-      for (const tab of tabs) {
-        if (tab.url && tab.url.includes("messengercompose") && !processedTabs.has(tab.id)) {
-          console.log("ftnQuoter: found compose via url:", tab.id);
-          setTimeout(() => processComposeWindow(tab), 500);
-        }
-      }
-    } catch (e2) {
-      // Silent fail
-    }
+    console.log("ftnQuoter: tabs.query failed:", e);
   }
 }
 

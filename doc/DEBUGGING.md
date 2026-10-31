@@ -154,9 +154,7 @@ ftnQuoter: tab [tabId] marked as processed
 Найдите ftnQuoter и проверьте permissions:
 - ✅ compose
 - ✅ messagesRead
-- ✅ accountsRead
 - ✅ storage
-- ✅ tabs
 
 Если permissions отсутствуют — переустановите расширение.
 
