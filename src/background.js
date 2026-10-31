@@ -273,6 +273,7 @@ const DEFAULT_SETTINGS = {
   color2: "brown",
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
+  stripRe: true,
   flowedFormat: false,
   addGreetings: true,
   newGreeting: "Hello, all!",
@@ -394,6 +395,7 @@ async function processComposeWindow(tab) {
     // Get original sender
     let initials = "??";
     let senderName = null;
+    let originalSubject = null;
 
     if (details.relatedMessageId) {
       try {
@@ -404,8 +406,25 @@ async function processComposeWindow(tab) {
           senderName = FTNQuoter.getName(msg.author);
           console.log("ftnQuoter: initials:", initials, "name:", senderName);
         }
+        if (msg) {
+          originalSubject = msg.subject;
+          console.log("ftnQuoter: original subject:", originalSubject);
+        }
       } catch (e) {
         console.error("ftnQuoter: error getting message:", e);
+      }
+    }
+
+    // FidoNet keeps the original subject on reply - undo Thunderbird's "Re: ".
+    // Skip if the original subject already started with "Re:" (TB added nothing then).
+    if (settings.stripRe && details.subject && /^Re:\s*/i.test(details.subject)
+        && !(originalSubject && /^Re:/i.test(originalSubject))) {
+      try {
+        const subject = details.subject.replace(/^Re:\s*/i, "");
+        await browser.compose.setComposeDetails(tab.id, { subject });
+        console.log("ftnQuoter: stripped Re: from subject:", subject);
+      } catch (e) {
+        console.error("ftnQuoter: error updating subject:", e);
       }
     }
 

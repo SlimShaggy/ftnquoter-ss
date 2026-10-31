@@ -22,21 +22,28 @@ const EXCLUDE = [
   '.git',
   '.gitignore',
   '.DS_Store',
-  OUTPUT_FILE,
+  'CLAUDE.md',
+  'README.md',
+  'build.sh',
+  'doc',
+  '*.xpi',
   'icons/create-icons.html',
   'icons/README.txt',
   'icons/*.svg'
 ];
 
 function shouldInclude(filePath) {
-  const relativePath = path.relative(BUILD_DIR, filePath);
+  // Normalize to forward slashes so patterns behave the same on Windows
+  const relativePath = path.relative(BUILD_DIR, filePath).split(path.sep).join('/');
 
   return !EXCLUDE.some(pattern => {
     if (pattern.includes('*')) {
-      const regex = new RegExp(pattern.replace('*', '.*'));
-      return regex.test(relativePath);
+      const source = pattern.split('*')
+        .map(part => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+        .join('.*');
+      return new RegExp(`^${source}$`).test(relativePath);
     }
-    return relativePath === pattern || relativePath.startsWith(pattern + path.sep);
+    return relativePath === pattern || relativePath.startsWith(pattern + '/');
   });
 }
 

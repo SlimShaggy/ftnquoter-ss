@@ -12,8 +12,9 @@ const DEFAULT_SETTINGS = {
   color2: "brown",
   groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
   addXCommentTo: true,
+  stripRe: true,
   flowedFormat: false,
-  addGreetings: false,
+  addGreetings: true,
   newGreeting: "Hello, all!",
   replyGreeting: "Hello, %firstname%!"
 };
@@ -73,6 +74,7 @@ async function loadSettings() {
     document.getElementById('useColors').checked = settings.useColors;
     document.getElementById('groupPattern').value = settings.groupPattern;
     document.getElementById('addXCommentTo').checked = settings.addXCommentTo;
+    document.getElementById('stripRe').checked = settings.stripRe;
     document.getElementById('flowedFormat').checked = settings.flowedFormat;
     document.getElementById('addGreetings').checked = settings.addGreetings;
     document.getElementById('newGreeting').value = settings.newGreeting;
@@ -112,6 +114,7 @@ async function saveSettings(e) {
     color2: document.getElementById('color2Text').value || hexToColorName(document.getElementById('color2').value),
     groupPattern: document.getElementById('groupPattern').value,
     addXCommentTo: document.getElementById('addXCommentTo').checked,
+    stripRe: document.getElementById('stripRe').checked,
     flowedFormat: document.getElementById('flowedFormat').checked,
     addGreetings: document.getElementById('addGreetings').checked,
     newGreeting: document.getElementById('newGreeting').value,
