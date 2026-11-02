@@ -150,11 +150,13 @@ browser.tabs.onCreated (tab.type === "messageCompose")
         │     • FTNQuoter.getName(author)
         │
         ├─► Format body
-        │     • FTNQuoter.formatBody(body, initials, settings)
+        │     • FTNQuoter.formatBody(body, initials, {...settings, commentTo})
+        │     │   (commentTo = original's X-Comment-To via messages.getFull)
         │     │
         │     ├─► Split into lines
         │     ├─► For each line:
-        │     │     ├─► Skip "On ... wrote:" attribution
+        │     │     ├─► Keep "On ... wrote:" attribution
+        │     │     │     (→ "wrote to <commentTo>:" / "пишет <commentTo>:")
         │     │     ├─► Detect TB quote marker (> )
         │     │     ├─► Check for nested quotes (IZ>)
         │     │     ├─► Apply FTN initials (VP>)

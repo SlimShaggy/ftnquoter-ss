@@ -122,7 +122,7 @@ const FTNQuoter = {
   },
 
   formatBody(body, initials, options = {}) {
-    const { quoteEmpty = false, quoteSignature = false, maxLineLen = 72 } = options;
+    const { quoteEmpty = false, quoteSignature = false, maxLineLen = 72, commentTo = null } = options;
     if (!body) return "";
 
     // TB adds HTML entities, convert them
@@ -146,12 +146,20 @@ const FTNQuoter = {
       const trimmed = line.trim();
       const isQuotedLine = /^ *>/.test(line);
 
-      // Keep attribution line as-is without quoting, then insert a blank line
+      // Keep attribution line without quoting, then insert a blank line
       // between it and the first quoted line (FTN style).
       // English: "On <date>, <name> wrote:"
       // Russian: "DD.MM.YYYY HH:MM, <name> пишет:"
+      // If the original had X-Comment-To, name its recipient:
+      // "... wrote to <recipient>:" / "... пишет <recipient>:"
       if (line.match(/^On .* wrote:$/i) || line.match(/^\d{2}\.\d{2}\.\d{4} \d{1,2}:\d{2}, .+ пишет:$/)) {
-        quotedLines.push(line);
+        if (commentTo) {
+          quotedLines.push(line
+            .replace(/ wrote:$/i, () => ` wrote to ${commentTo}:`)
+            .replace(/ пишет:$/, () => ` пишет ${commentTo}:`));
+        } else {
+          quotedLines.push(line);
+        }
         quotedLines.push("");
         continue;
       }
@@ -398,6 +406,7 @@ async function processComposeWindow(tab) {
     let initials = "??";
     let senderName = null;
     let originalSubject = null;
+    let commentTo = null;
 
     if (details.relatedMessageId) {
       try {
@@ -414,6 +423,18 @@ async function processComposeWindow(tab) {
         }
       } catch (e) {
         logError("error getting message:", e);
+      }
+
+      try {
+        const full = await browser.messages.getFull(details.relatedMessageId);
+        const xct = full && full.headers && full.headers["x-comment-to"];
+        if (xct && xct[0] && xct[0].trim()) {
+          // messages.getFull() returns RFC 2047 headers already decoded
+          commentTo = xct[0].trim();
+          log("X-Comment-To of original:", commentTo);
+        }
+      } catch (e) {
+        logError("error getting X-Comment-To:", e);
       }
     }
 
@@ -441,7 +462,7 @@ async function processComposeWindow(tab) {
     }
 
     // Quote it
-    const quoted = FTNQuoter.formatBody(body, initials, settings);
+    const quoted = FTNQuoter.formatBody(body, initials, { ...settings, commentTo });
     log("quoted length:", quoted.length);
     log("quoted preview:", quoted.substring(0, 500));
 
