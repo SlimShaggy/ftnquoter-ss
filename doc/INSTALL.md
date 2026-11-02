@@ -141,7 +141,7 @@ npm run build
 **Решение:**
 1. Откройте `modern-extension/icons/create-icons.html` в браузере
 2. Скачайте сгенерированные PNG файлы
-3. Сохраните их как `icon-48.png` и `icon-96.png` в директории `icons/`
+3. Сохраните их как `icon-48.png`, `icon-64.png`, `icon-96.png` и `icon-128.png` в директории `icons/`
 4. Пересоберите расширение
 
 ## Структура директорий
@@ -177,7 +177,9 @@ Archive:  ftnquoter-ss-2.0.x-tb.xpi
   src/options/options.css
   src/options/options.js
   icons/icon-48.png
+  icons/icon-64.png
   icons/icon-96.png
+  icons/icon-128.png
 ```
 
 ### Публикация на addons.thunderbird.net
