@@ -10,7 +10,7 @@ const path = require('path');
 const archiver = require('archiver');
 
 const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'), 'utf8'));
-const OUTPUT_FILE = `ftnquoter-ss-${manifest.version}.xpi`;
+const OUTPUT_FILE = `ftnquoter-ss-${manifest.version}-tb.xpi`;
 const BUILD_DIR = path.join(__dirname);
 
 // Files and directories to exclude from the build

@@ -167,14 +167,14 @@ ftnQuoter-ss: tab [tabId] marked as processed
 2. **Пересобрать XPI:**
    ```bash
    cd modern-extension
-   rm ftnquoter-ss-2.0.x.xpi
+   rm ftnquoter-ss-2.0.x-tb.xpi
    npm run build
    ```
 
 3. **Установить заново:**
    - `Меню → Дополнения и темы`
    - `⚙️` → Установить дополнение из файла
-   - Выбрать новый `ftnquoter-ss-2.0.x.xpi`
+   - Выбрать новый `ftnquoter-ss-2.0.x-tb.xpi`
 
 ## Известные проблемы
 

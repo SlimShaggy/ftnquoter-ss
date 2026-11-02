@@ -4,7 +4,7 @@
   "version": "2.0.4",
   "author": "Claude Code (orig. by Sergey Poziturin)",
   "description": "FTN-style message quoter (like GoldEd) for modern Thunderbird",
-  "applications": {
+  "browser_specific_settings": {
     "gecko": {
       "id": "ftnQuoter@ss",
       "strict_min_version": "115.0"

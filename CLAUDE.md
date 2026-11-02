@@ -10,7 +10,7 @@ ftnQuoter is a Thunderbird 115+ MailExtension (Manifest V2, plain JavaScript, no
 
 ```sh
 npm install
-npm run build   # node build.js -> ftnquoter-ss-<manifest version>.xpi in repo root
+npm run build   # node build.js -> ftnquoter-ss-<manifest version>-tb.xpi in repo root
 npm run lint    # web-ext lint
 npm run watch   # web-ext run with browser console (launches a Firefox-family browser)
 ```

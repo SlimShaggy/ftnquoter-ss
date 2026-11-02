@@ -20,7 +20,7 @@ npm install
 npm run build
 ```
 
-Будет создан файл `ftnquoter-ss-2.0.x.xpi` в корневой директории проекта.
+Будет создан файл `ftnquoter-ss-2.0.x-tb.xpi` в корневой директории проекта.
 
 **Что происходит при сборке:**
 - Скрипт `build.js` создаёт ZIP-архив
@@ -33,7 +33,7 @@ npm run build
 2. Откройте меню **☰ → Дополнения и темы** (или нажмите `Ctrl+Shift+A`)
 3. Нажмите на **шестеренку** (⚙️) в правом верхнем углу
 4. Выберите **Установить дополнение из файла...**
-5. Выберите файл `ftnquoter-ss-2.0.x.xpi`
+5. Выберите файл `ftnquoter-ss-2.0.x-tb.xpi`
 6. Подтвердите установку
 
 ## Настройка
@@ -163,12 +163,12 @@ npm install
 npm run build
 
 # 4. Проверьте содержимое
-unzip -l ftnquoter-ss-2.0.x.xpi
+unzip -l ftnquoter-ss-2.0.x-tb.xpi
 ```
 
 **Ожидаемое содержимое XPI:**
 ```
-Archive:  ftnquoter-ss-2.0.x.xpi
+Archive:  ftnquoter-ss-2.0.x-tb.xpi
   manifest.json
   src/background.js
   src/display-script.js
@@ -184,7 +184,7 @@ Archive:  ftnquoter-ss-2.0.x.xpi
 
 1. Зарегистрируйтесь на https://addons.thunderbird.net
 2. Создайте новое дополнение
-3. Загрузите файл `ftnquoter-ss-2.0.x.xpi`
+3. Загрузите файл `ftnquoter-ss-2.0.x-tb.xpi`
 4. Заполните описание и метаданные
 5. Дождитесь проверки модераторами
 
