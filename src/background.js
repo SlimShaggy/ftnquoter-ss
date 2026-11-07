@@ -274,16 +274,20 @@ const FTNQuoter = {
   }
 };
 
+// groupPattern default before 2.0.6, replaced by the migration in getSettings()
+const OLD_DEFAULT_GROUP_PATTERN = "^(fido7\\.|.*<.*@.*>).*$";
+
 // Default settings
 const DEFAULT_SETTINGS = {
   enabled: true,
+  accounts: [],
   maxLineLen: 72,
   quoteEmpty: false,
   quoteSignature: false,
   useColors: true,
   color1: "blue",
   color2: "brown",
-  groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
+  groupPattern: ".*",
   addXCommentTo: true,
   stripRe: true,
   flowedFormat: false,
@@ -314,11 +318,34 @@ async function getSettings() {
     }
   }
 
+  // Migration from versions before 2.0.6: the old default pattern rejects
+  // FidoNet echo names (SU.GENERAL) now that newsgroups are matched too.
+  // Account selection does the main filtering, so the new default is ".*".
+  if (settings.groupPattern === OLD_DEFAULT_GROUP_PATTERN) {
+    settings.groupPattern = DEFAULT_SETTINGS.groupPattern;
+  }
+
   return settings;
 }
 
 async function saveSettings(settings) {
   await browser.storage.local.set({ settings });
+}
+
+// Find the account a compose identity belongs to.
+// Scans accounts.list() instead of using identities.get(), because
+// MailIdentity.accountId is not available in Thunderbird 115.
+async function getAccountIdForIdentity(identityId) {
+  if (!identityId) {
+    return null;
+  }
+  const accounts = await browser.accounts.list();
+  for (const account of accounts) {
+    if ((account.identities || []).some(identity => identity.id === identityId)) {
+      return account.id;
+    }
+  }
+  return null;
 }
 
 // Main processing function
@@ -341,16 +368,31 @@ async function processComposeWindow(tab) {
       return;
     }
 
+    const selectedAccounts = Array.isArray(settings.accounts) ? settings.accounts : [];
+    if (selectedAccounts.length === 0) {
+      log("no accounts selected, doing nothing");
+      return;
+    }
+
     const details = await browser.compose.getComposeDetails(tab.id);
     log("details:", {
       type: details.type,
       to: details.to,
+      newsgroups: details.newsgroups,
       relatedMessageId: details.relatedMessageId
     });
 
     // Messages opened from Drafts must never be modified.
     if (details.type === "draft") {
       log("draft message, skipping");
+      return;
+    }
+
+    // Only work in the accounts selected in the options.
+    const accountId = await getAccountIdForIdentity(details.identityId);
+    log("identity:", details.identityId, "account:", accountId);
+    if (!accountId || !selectedAccounts.includes(accountId)) {
+      log("account not selected, skipping");
       return;
     }
 
@@ -385,7 +427,9 @@ async function processComposeWindow(tab) {
     }
 
     // Check recipients
-    const recipients = [...(details.to || []), ...(details.cc || [])];
+    // Newsgroups (NNTP replies have them instead of To) are matched as well.
+    const newsgroups = [].concat(details.newsgroups || []);
+    const recipients = [...(details.to || []), ...(details.cc || []), ...newsgroups];
     const recipientString = recipients
       .map(r => typeof r === 'string' ? r : (r.addr || r.email || ''))
       .join(", ");
@@ -418,8 +462,10 @@ async function processComposeWindow(tab) {
           log("initials:", initials, "name:", senderName);
         }
         if (msg) {
+          // Fallback only: TB strips "Re:" from stored subjects (HasRe flag),
+          // so msg.subject usually lacks it even when the original had one.
           originalSubject = msg.subject;
-          log("original subject:", originalSubject);
+          log("original subject (db):", originalSubject);
         }
       } catch (e) {
         logError("error getting message:", e);
@@ -427,6 +473,11 @@ async function processComposeWindow(tab) {
 
       try {
         const full = await browser.messages.getFull(details.relatedMessageId);
+        const subj = full && full.headers && full.headers.subject;
+        if (subj && typeof subj[0] === "string") {
+          originalSubject = subj[0].trim();
+          log("original subject (header):", originalSubject);
+        }
         const xct = full && full.headers && full.headers["x-comment-to"];
         if (xct && xct[0] && xct[0].trim()) {
           // messages.getFull() returns RFC 2047 headers already decoded
@@ -439,7 +490,7 @@ async function processComposeWindow(tab) {
     }
 
     // FidoNet keeps the original subject on reply - undo Thunderbird's "Re: ".
-    // Skip if the original subject already started with "Re:" (TB added nothing then).
+    // Skip if the original Subject header already started with "Re:" (TB added nothing then).
     if (settings.stripRe && details.subject && /^Re:\s*/i.test(details.subject)
         && !(originalSubject && /^Re:/i.test(originalSubject))) {
       try {

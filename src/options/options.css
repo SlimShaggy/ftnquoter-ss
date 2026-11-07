@@ -110,6 +110,26 @@ input[type="color"] + input[type="text"] {
   font-style: italic;
 }
 
+.help.warning {
+  color: #b9770e;
+  font-style: normal;
+  font-weight: 500;
+}
+
+.help.warning[hidden] {
+  display: none;
+}
+
+#accountList label {
+  font-weight: normal;
+  margin-bottom: 3px;
+}
+
+#accountList .account-type {
+  color: #7f8c8d;
+  font-size: 12px;
+}
+
 .help code {
   font-family: monospace;
   font-style: normal;

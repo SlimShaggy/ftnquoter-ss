@@ -128,6 +128,7 @@ browser.tabs.onCreated (tab.type === "messageCompose")
         ├─► Add tab.id to processedTabs
         ├─► Get settings
         ├─► Check if enabled → Exit if disabled
+        ├─► Check settings.accounts non-empty → Exit if empty
         │
         ├─► Get compose details
         │     • Type (reply/replyAll/forward)
@@ -135,10 +136,14 @@ browser.tabs.onCreated (tab.type === "messageCompose")
         │     • Body
         │     • relatedMessageId
         │
+        ├─► Map details.identityId to an account (accounts.list())
+        │     • Exit if the account is not in settings.accounts
+        │
         ├─► Check if reply/forward → Exit if new message
         │
         ├─► Match recipients against groupPattern
-        │     • Skip check if recipients empty
+        │     • To, Cc and newsgroups
+        │     • Skip check if all empty
         │     • Exit if no match
         │
         ├─► Get original message

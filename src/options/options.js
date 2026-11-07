@@ -2,15 +2,19 @@
  * Options page script for ftnQuoter-ss
  */
 
+// groupPattern default before 2.0.6, replaced by the migration in loadSettings()
+const OLD_DEFAULT_GROUP_PATTERN = "^(fido7\\.|.*<.*@.*>).*$";
+
 const DEFAULT_SETTINGS = {
   enabled: true,
+  accounts: [],
   maxLineLen: 72,
   quoteEmpty: false,
   quoteSignature: false,
   useColors: true,
   color1: "blue",
   color2: "brown",
-  groupPattern: "^(fido7\\.|.*<.*@.*>).*$",
+  groupPattern: ".*",
   addXCommentTo: true,
   stripRe: true,
   flowedFormat: false,
@@ -45,6 +49,57 @@ function colorNameToHex(name) {
 }
 
 /**
+ * Build the account checkboxes; `selected` is the array of checked account IDs.
+ */
+async function renderAccounts(selected) {
+  const list = document.getElementById('accountList');
+  list.textContent = '';
+
+  let accounts = [];
+  try {
+    accounts = await browser.accounts.list();
+  } catch (error) {
+    console.error("Error listing accounts:", error);
+  }
+
+  if (accounts.length === 0) {
+    const none = document.createElement('p');
+    none.className = 'help';
+    none.textContent = 'No accounts found.';
+    list.appendChild(none);
+  }
+
+  for (const account of accounts) {
+    const label = document.createElement('label');
+    const checkbox = document.createElement('input');
+    checkbox.type = 'checkbox';
+    checkbox.value = account.id;
+    checkbox.checked = selected.includes(account.id);
+    checkbox.addEventListener('change', updateAccountsWarning);
+
+    const type = document.createElement('span');
+    type.className = 'account-type';
+    type.textContent = ` (${account.type})`;
+
+    label.appendChild(checkbox);
+    label.appendChild(document.createTextNode(account.name));
+    label.appendChild(type);
+    list.appendChild(label);
+  }
+
+  updateAccountsWarning();
+}
+
+function getSelectedAccounts() {
+  return Array.from(document.querySelectorAll('#accountList input[type="checkbox"]:checked'))
+    .map(checkbox => checkbox.value);
+}
+
+function updateAccountsWarning() {
+  document.getElementById('accountsWarning').hidden = getSelectedAccounts().length > 0;
+}
+
+/**
  * Load settings and populate form
  */
 async function loadSettings() {
@@ -66,8 +121,16 @@ async function loadSettings() {
       }
     }
 
+    // Migration from versions before 2.0.6: the old default pattern rejects
+    // FidoNet echo names (SU.GENERAL) now that newsgroups are matched too.
+    // Account selection does the main filtering, so the new default is ".*".
+    if (settings.groupPattern === OLD_DEFAULT_GROUP_PATTERN) {
+      settings.groupPattern = DEFAULT_SETTINGS.groupPattern;
+    }
+
     // Populate form fields
     document.getElementById('enabled').checked = settings.enabled;
+    await renderAccounts(Array.isArray(settings.accounts) ? settings.accounts : []);
     document.getElementById('maxLineLen').value = settings.maxLineLen;
     document.getElementById('quoteEmpty').checked = settings.quoteEmpty;
     document.getElementById('quoteSignature').checked = settings.quoteSignature;
@@ -106,6 +169,7 @@ async function saveSettings(e) {
 
   const settings = {
     enabled: document.getElementById('enabled').checked,
+    accounts: getSelectedAccounts(),
     maxLineLen: parseInt(document.getElementById('maxLineLen').value),
     quoteEmpty: document.getElementById('quoteEmpty').checked,
     quoteSignature: document.getElementById('quoteSignature').checked,

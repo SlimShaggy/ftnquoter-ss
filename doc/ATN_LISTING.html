@@ -1,0 +1,68 @@
+<!--
+  Paste-ready text for the addons.thunderbird.net listing (Edit Product Page).
+  ATN allows only a limited set of tags (a, b, code, em, i, li, ol, strong, ul, blockquote),
+  so no headings are used. Line breaks in the field are preserved.
+
+  SUMMARY field (max 250 characters):
+  Add-on for FidoNet/NNTP gateway users. Adds GoldED-style reply quoting, wraps long lines, automatically adds greetings, and colors quote levels.
+-->
+
+<b>ftnQuoter-ss</b> rewrites Thunderbird's standard reply quoting into the FidoNet / GoldED style. Instead of <code>&gt; text</code> you get the original author's initials. If the author is John Smith, the quotes looks like this:
+
+<code> SP&gt; This is a quoted line
+ SP&gt;&gt; And this is a second-level quote</code>
+
+<b>Where to find it (there is no toolbar button or menu item)</b>
+<ol>
+<li><b>The Reply / Reply All command.</b> This is where the add-on does its work. Select a message, optionally select the part you want to quote, and click Reply or Reply to All. The reply window opens with the quote already converted.</li>
+<li><b>The add-on's settings page.</b> Open the Tools menu &rarr; Add-ons and Themes, find <b>ftnQuoter-ss</b> in the Extensions list, then open its settings by clicking the wrench icon.</li>
+</ol>
+
+<b>Quick start</b>
+<ol>
+<li>Install the add-on and approve the permissions it asks for.</li>
+<li><b>Initial configuration (required):</b> open the add-on's settings (see above) and, in the <b>Accounts</b> list, tick the accounts you use for FidoNet, for example your FidoNet/NNTP gateway news account. Click <b>Save Settings</b>. Until at least one account is ticked, the add-on does nothing at all, so your regular email and other newsgroups are never touched.</li>
+<li>Select any message in one of the ticked accounts and click <b>Reply</b>.</li>
+<li>In the compose window, the quoted text now uses the author's initials. Write your answer below the quote and send it as usual.</li>
+</ol>
+
+<b>What happens automatically in a reply</b>
+<ul>
+<li>The initials come from the original author's name: "John Smith" gives <code>JS</code>.</li>
+<li>Nested quotes get one more <code>&gt;</code>: <code>JS&gt;</code> becomes <code>JS&gt;&gt;</code>, and so on.</li>
+<li>Long lines are wrapped to the maximum line length (72 by default).</li>
+<li>The signature after a <code>---</code> tearline is removed from the quote, together with a <code>...</code> tagline directly above it. You can keep it with "Quote signature" option.</li>
+<li>The "Re: " prefix is removed from the subject, as is usual in FidoNet. This can be turned off in settings.</li>
+<li>A greeting such as "Hello, John!" is inserted at the top of the reply. New messages get "Hello, all!". This can be turned off or edited.</li>
+<li>An <code>X-Comment-To: &lt;original author&gt;</code> header is added to your reply. If the original message had its own X-Comment-To, the attribution line names that person too, e.g. "John Smith wrote to Ivan Petrov:".</li>
+<li>Quote levels are colored when you read a message and in the compose window: blue for odd levels and brown for even levels by default.</li>
+</ul>
+
+<b>Settings</b> (Add-ons and Themes &rarr; ftnQuoter-ss &rarr; wrench icon, then <b>Save Settings</b>)
+<ul>
+<li><b>Enable ftnQuoter-ss</b>: global on/off switch.</li>
+<li><b>Accounts</b>: the add-on works only in the accounts ticked here (replies, and greetings in new messages). It does nothing in any other account.</li>
+<li><b>Maximum line length</b>: 40 to 120 characters, 72 by default.</li>
+<li><b>Group pattern (regex)</b>: an additional filter inside the ticked accounts. The add-on only converts replies whose To/Cc recipients or newsgroups match this regular expression. The default <code>.*</code> converts every reply in the ticked accounts. To leave other newsgroups of the same news server alone, narrow it, for example to <code>^fido7\.</code> to convert only fido7.* groups. Matching is case-sensitive. Replies with no recipients and no newsgroups are always converted.</li>
+<li><b>Quote empty lines</b>: put the marker (<code> SP&gt;</code>) on blank lines inside the quote.</li>
+<li><b>Quote signature</b>: keep the original signature in the quote.</li>
+<li><b>Use flowed format</b>: send plain-text messages as format=flowed.</li>
+<li><b>Use color markup</b>, <b>first / second level quote color</b>: turn quote coloring on or off and choose the colors with the color picker or by typing a CSS color name.</li>
+<li><b>Add X-Comment-To header</b>: add the header with the original author's name.</li>
+<li><b>Don't add "Re: " to subject</b>: keep the original subject on replies.</li>
+<li><b>Automatically add greetings</b>, <b>New message greeting</b>, <b>Reply greeting</b>: in the reply greeting, <code>%firstname%</code>, <code>%lastname%</code> and <code>%fullname%</code> are replaced with the original author's name.</li>
+<li><b>Reset to Defaults</b> restores all of the above.</li>
+</ul>
+
+<b>Troubleshooting</b>
+<ul>
+<li><b>The quote was not converted.</b> Check that the add-on is enabled, that the account you are replying from is ticked in <b>Accounts</b>, that you used Reply or Reply All (Forward and Edit as New are not quoted), and that the recipients or newsgroups match the Group pattern. Messages opened from Drafts are never modified.</li>
+<li><b>No colors.</b> Check that "Use color markup" is on. Colors are only a display aid: the text you send is the same, and the color of a quote is never part of a plain-text message.</li>
+<li><b>Anything else.</b> Open the Browser Console (Ctrl+Shift+J) and filter by <code>ftnQuoter-ss</code>. Every step of the processing is logged there.</li>
+</ul>
+
+<b>Permissions and privacy</b>
+The add-on reads the message you are replying to (author, subject, X-Comment-To) and edits the reply you are composing. It also reads the list of your mail and news accounts (names and types only) to show the Accounts list in its settings. Settings are stored locally in Thunderbird. The add-on does not connect to the internet or send any data anywhere.
+
+<b>Credits</b>
+Based on the original ftnQuoter 0.9 by Sergey Poziturin (2010), rewritten for Thunderbird 115+ with the WebExtension APIs. Requires Thunderbird 115 or newer.

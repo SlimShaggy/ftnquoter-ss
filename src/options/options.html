@@ -23,6 +23,13 @@
         </div>
 
         <div class="field">
+          <label>Accounts:</label>
+          <div id="accountList"></div>
+          <p class="help">ftnQuoter-ss works only in the selected accounts, and does nothing in the others. With no accounts selected, it does nothing at all.</p>
+          <p class="help warning" id="accountsWarning" hidden>No accounts selected: the add-on is currently inactive.</p>
+        </div>
+
+        <div class="field">
           <label for="maxLineLen">Maximum line length:</label>
           <input type="number" id="maxLineLen" name="maxLineLen" min="40" max="120" value="72">
           <p class="help">Maximum characters per line (default: 72)</p>
@@ -31,8 +38,8 @@
         <div class="field">
           <label for="groupPattern">Group pattern (regex):</label>
           <input type="text" id="groupPattern" name="groupPattern"
-                 placeholder="^(fido7\.|.*<.*@.*>).*$" size="50">
-          <p class="help">Only apply quoting to messages matching this pattern</p>
+                 placeholder=".*" size="50">
+          <p class="help">Within the selected accounts, only apply quoting to replies whose To/Cc recipients or newsgroups match this pattern. The default <code>.*</code> matches everything; for example, <code>^fido7\.</code> limits quoting to fido7.* groups.</p>
         </div>
       </div>
 
