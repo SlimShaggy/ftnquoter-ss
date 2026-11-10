@@ -30,4 +30,4 @@ There are no automated tests. To verify a change, install the built `.xpi` in Th
 
 - **`DEFAULT_SETTINGS` and the greetings migration are duplicated** in `src/background.js` and `src/options/options.js`. Keep the two copies identical: adding or changing a setting means updating both, plus `options.html`.
 - **Version bumps** (each release is a commit named after the version) touch `manifest.json`, `package.json`, `package-lock.json`, and a new entry in `doc/CHANGELOG.md`. `build.js` reads the version from `manifest.json`.
-- **`build.js` packages the whole repo root except its `EXCLUDE` list.** Any new non-extension file or directory at the root (docs, scripts, configs) must be added to `EXCLUDE`, or it ends up inside the XPI.
+- **`build.js` packages only its `INCLUDE` list** (`manifest.json`, `src/`, `icons/*.png`). A new file the extension needs at runtime (e.g. a new top-level directory) must be added to `INCLUDE`, or it is missing from the XPI.

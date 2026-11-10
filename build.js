@@ -13,37 +13,34 @@ const manifest = JSON.parse(fs.readFileSync(path.join(__dirname, 'manifest.json'
 const OUTPUT_FILE = `ftnquoter-ss-${manifest.version}-tb.xpi`;
 const BUILD_DIR = path.join(__dirname);
 
-// Files and directories to exclude from the build
-const EXCLUDE = [
-  'node_modules',
-  'build.js',
-  'package.json',
-  'package-lock.json',
-  '.git',
-  '.gitignore',
-  '.DS_Store',
-  'CLAUDE.md',
-  'README.md',
-  'build.sh',
-  'doc',
-  '*.xpi',
-  'icons/create-icons.html',
-  'icons/README.txt',
-  'icons/*.svg'
+// Files and directories included in the build (everything else is left out).
+// Entries are exact paths, directories (included recursively) or '*' patterns.
+const INCLUDE = [
+  'manifest.json',
+  'src',
+  'icons/*.png'
 ];
 
-function shouldInclude(filePath) {
+function toRegExp(pattern) {
+  const source = pattern.split('*')
+    .map(part => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
+    .join('[^/]*');
+  return new RegExp(`^${source}$`);
+}
+
+function shouldInclude(filePath, isDirectory) {
   // Normalize to forward slashes so patterns behave the same on Windows
   const relativePath = path.relative(BUILD_DIR, filePath).split(path.sep).join('/');
 
-  return !EXCLUDE.some(pattern => {
+  return INCLUDE.some(pattern => {
     if (pattern.includes('*')) {
-      const source = pattern.split('*')
-        .map(part => part.replace(/[.+?^${}()|[\]\\]/g, '\\$&'))
-        .join('.*');
-      return new RegExp(`^${source}$`).test(relativePath);
+      // A directory is entered if it contains files the pattern can match
+      if (isDirectory) return pattern.startsWith(relativePath + '/');
+      return toRegExp(pattern).test(relativePath);
     }
-    return relativePath === pattern || relativePath.startsWith(pattern + '/');
+    return relativePath === pattern ||
+      relativePath.startsWith(pattern + '/') ||
+      (isDirectory && pattern.startsWith(relativePath + '/'));
   });
 }
 
@@ -81,7 +78,7 @@ function createXPI() {
         const filePath = path.join(dir, file);
         const stat = fs.statSync(filePath);
 
-        if (!shouldInclude(filePath)) {
+        if (!shouldInclude(filePath, stat.isDirectory())) {
           return;
         }
 
